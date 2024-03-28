@@ -8,7 +8,9 @@ import { Request, Response } from 'express';
 @Controller('oauth')
 export class QuickBooksController {
   private readonly oauth: OAuth;
-
+  // "node-quickbooks": "^2.0.44",
+  // "oauth-1.0a": "^2.2.6",
+  // "quickbooks": "^1.0.4",
   constructor() {
     this.oauth = new OAuth({
       consumer: {
