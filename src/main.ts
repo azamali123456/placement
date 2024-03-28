@@ -21,7 +21,7 @@ async function bootstrap() {
   );
   const configService = app.select(ConfigrationModule).get(ConfigrationService);
 
-  if (configService.kafkaEnabled) {
+  // if (configService.kafkaEnabled) {
     // app.connectMicroservice<MicroserviceOptions>({
     //   transport: Transport.KAFKA,
     //   options: {
@@ -34,8 +34,8 @@ async function bootstrap() {
     //   },
     // });
 
-    await app.startAllMicroservices();
-  }
+  //   await app.startAllMicroservices();
+  // }
 
   app.set('trust proxy', 1); // only if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
   app.use(helmet());

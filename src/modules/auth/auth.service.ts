@@ -18,7 +18,6 @@ export class AuthService {
    delete user.users_password;
     return new TokenPayloadDto({
       user,
-      expiresIn: parseInt(process.env.JWT_EXPIRATION_TIME || '60'),
       accessToken: await this.jwtService.signAsync({
         id: user.id,
         type: TokenType.ACCESS_TOKEN,
