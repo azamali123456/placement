@@ -63,7 +63,6 @@
     "rxjs": "^7.2.0",
     "stripe": "^11.18.0",
     "strong-soap": "^4.0.3",
-    "swagger-ui-express": "^4.6.2",
     "typeorm": "^0.3.19",
     "webpack": "^5.78.0"
   },

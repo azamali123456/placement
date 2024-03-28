@@ -6,7 +6,7 @@ import { middleware as expressCtx } from 'express-ctx';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
-import { setupSwagger } from './setup-swagger';
+// import { setupSwagger } from './setup-swagger';
 import { ConfigrationService } from './configration/configration.service';
 import { ConfigrationModule } from './configration/configration.module';
 // import { MicroserviceOptions, Transport } from '@nestjs/microservices';
@@ -55,9 +55,9 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({}));
 
-  if (configService.documentationEnabled) {
-    setupSwagger(app);
-  }
+  // if (configService.documentationEnabled) {
+  //   setupSwagger(app);
+  // }
 
   app.use(expressCtx);
 
