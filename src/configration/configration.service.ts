@@ -14,9 +14,9 @@ export class ConfigrationService {
     return process.env.ENABLE_DOCUMENTATION;
   }
 
-  get kafkaEnabled(): boolean {
-    return JSON.parse(process.env.KAFKA_ENABLED);
-  }
+  // get kafkaEnabled(): boolean {
+  //   return JSON.parse(process.env.KAFKA_ENABLED);
+  // }
   get kafkaConfig() {
     return {
       clientId: process.env.KAFKA_CLIENT_ID,
