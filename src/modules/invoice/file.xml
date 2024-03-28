@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<QBWCXML>
+  <AppName>YourAppName</AppName>
+  <AppID>{YOUR_APP_ID}</AppID>
+  <AppURL>http://localhost:3000/quickbooks/qbwc</AppURL>
+  <AppDescription>Your app description</AppDescription>
+  <AppSupport>http://localhost:3000/</AppSupport>
+  <UserName>YourQBUsername</UserName>
+  <OwnerID>{YOUR_OWNER_ID}</OwnerID>
+  <FileID>{YOUR_FILE_ID}</FileID>
+  <QBType>QBFS</QBType>
+  <Style>Document</Style>
+</QBWCXML>
