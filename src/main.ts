@@ -9,7 +9,7 @@ import { AppModule } from './app.module';
 import { setupSwagger } from './setup-swagger';
 import { ConfigrationService } from './configration/configration.service';
 import { ConfigrationModule } from './configration/configration.module';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+// import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { urlencoded, json } from 'express';
 import { join } from 'path';
 
@@ -22,17 +22,17 @@ async function bootstrap() {
   const configService = app.select(ConfigrationModule).get(ConfigrationService);
 
   if (configService.kafkaEnabled) {
-    app.connectMicroservice<MicroserviceOptions>({
-      transport: Transport.KAFKA,
-      options: {
-        client: {
-          brokers: ['localhost:29092'],
-        },
-        consumer: {
-          groupId: 'log-consumer',
-        },
-      },
-    });
+    // app.connectMicroservice<MicroserviceOptions>({
+    //   transport: Transport.KAFKA,
+    //   options: {
+    //     client: {
+    //       brokers: ['localhost:29092'],
+    //     },
+    //     consumer: {
+    //       groupId: 'log-consumer',
+    //     },
+    //   },
+    // });
 
     await app.startAllMicroservices();
   }
