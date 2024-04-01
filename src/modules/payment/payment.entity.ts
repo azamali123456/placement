@@ -47,6 +47,10 @@ export class Payment extends BaseEntity {
   @IsOptional()
   balance_transaction!: string;
 
+  @ApiProperty()
+  @Column({ nullable: true })
+  @IsOptional()
+  receipt_url!: string;
   // Billing Details
   @ApiProperty()
   @Column({ type: 'json', nullable: true })
@@ -155,6 +159,19 @@ export class Payment extends BaseEntity {
       country: string;
       exp_month: number;
       exp_year: number;
+      extended_authorization?: any;
+      fingerprint?: string;
+      funding?: string;
+      incremental_authorization?: any;
+      installments?: number | null;
+      last4: string;
+      mandate?: any;
+      multicapture?: any;
+      network: string;
+      network_token?: any;
+      overcapture?: any;
+      three_d_secure?: any;
+      wallet?: any;
     };
     type: string;
   };

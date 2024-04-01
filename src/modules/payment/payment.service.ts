@@ -114,32 +114,80 @@ export class PaymentService {
     return session;
   }
 
-  // async createCheckoutInstant(object: any): Promise<any> {
-  //   const session = await this.stripe.checkout.sessions.create({
-  //     line_items: [
-  //       {
-  //         price_data: {
-  //           currency: 'usd', // or your preferred currency
-  //           product_data: {
-  //             name: object.name,
-  //             description: object.discription,
-  //           },
-  //           unit_amount: parseInt(object.amount) * 100, // amount in cents
-  //         },
-  //         quantity: object.quantity,
+  // Setup Charge Now
+  async createCharge(object: any): Promise<any> {
+    try {
+      const stripe = require('stripe')('sk_test_51NFKZLAgDjJFNJDFCKn6K3RAcVhlQ4xnm6TaKI6ddKkHdfxT3928rcB8baVoB3XCFoscIrllGpeuPjRmwWAVt6qJ00vrjPBTnF');
+      let amount: any = 0
+      let description: any = ''
+      let token: any
+      let currency: any = ''
+      for (let x = 0; x < object.length; x++) {
+        amount = object[x].amount + amount
+        description = `${object[x].name}- ${description}`
+        token = object[x].token
+        currency = 'usd'
+      }
+      const charge = await stripe.charges.create({
+        amount,
+        currency,
+        description,
+        source: token,
+      });
 
-  //       },
 
-  //     ],
-  //     metadata: {
-  //       jobId: `${object.jobId}`,
-  //       userId: `${object.userId}`,
-  //     },
-  //     payment_method_types: ['card', 'us_bank_account', 'cashapp'],
-  //     mode: 'payment',
-  //     success_url: `http://localhost:3000`,
-  //     cancel_url: `http://localhost:3000`,
-  //   });
-  //   return session;
-  // }
+      // const { name, email } = charge.data.object.customer_details.name;
+      // const stripeUser: any = await this.stripe.customers.create({
+      //   name,
+      //   email,
+      // });
+      // const jobsMetadata = JSON.parse(charge.data.object.metadata.Jobs);
+      // Saved the Payment Data
+      for (let x = 0; x < object.length; x++) {
+        const metadata = { url: object[x].success_url, city: object[x].billingAddress.city, type: object[x].billingMethod.type, email: object[x].billingMethod.email, jobId: object[x].jobId, state: object[x].billingAddress.state, userId: object[x].userId, address: "", company: object[x].billingAddress.company, zipCode: object[x].billingAddress.zipCode, lastName: object[x].billingAddress.lastName, firstName: object[x].billingAddress.firstName }
+        const paymentObj = {
+          varify: true,
+          refunded: charge.refunded,
+          receipt_email: object[0].billingMethod.email,
+          payment_method_details: charge.payment_method_details,
+          payment_method: charge.payment_method,
+          payment_intent: charge.payment_intent,
+          paid: charge.paid,
+          invoice: charge.invoice,
+          customer: charge.customer,
+          currency: charge.currency,
+          created: charge.created,
+          receipt_url: charge.receipt_url,
+          billing_details: charge.billing_details,
+          balance_transaction: charge.balance_transaction,
+          amount_refunded: charge.amount_refunded,
+          amount_captured: charge.amount_captured,
+          amount: charge.amount,
+          object: charge.object,
+          metadata: metadata,
+          jobId: Number(metadata.jobId),
+          billingAddress: {
+            firstName: metadata?.firstName,
+            lastName: metadata.lastName,
+            company: metadata?.company,
+            address: metadata?.address,
+            city: metadata?.city,
+            state: metadata?.state,
+            zipCode: metadata?.zipCode,
+          },
+          billingMethod: {
+
+            type: metadata?.type,
+            email: metadata?.email,
+          },
+        };
+        const checkOut: any = await this.paymentRepository.create(paymentObj);
+        const checkOutSaved: any = await this.paymentRepository.save(checkOut);
+      }
+      return responseSuccessMessage('Checkout has been Done Successfully!', [], 200);
+    } catch (err: any) {
+      throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
+    }
+  }
+
 }
