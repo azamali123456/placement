@@ -201,6 +201,7 @@ export class JobService {
           'employerInfo.worksiteStreet',
           'employerInfo.worksiteCity',
           'employerInfo.worksiteZipCode',
+          'employerInfo.state',
           'payment',
           'packages',
         ])

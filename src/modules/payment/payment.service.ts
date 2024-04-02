@@ -6,12 +6,17 @@ import { Repository } from 'typeorm';
 import { Payment } from './payment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JobService } from '../job/job.service';
+import { MailService} from '../mail/mail.service'
 @Injectable()
 export class PaymentService {
   private stripe: Stripe;
   @InjectRepository(Payment)
   private readonly paymentRepository: Repository<Payment>;
-  constructor(private readonly jobService: JobService) {
+  
+  constructor(private readonly jobService: JobService,
+    private readonly mailService: MailService
+
+    ) {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2022-11-15',
     });
@@ -19,8 +24,6 @@ export class PaymentService {
   // Saved Payment Data
   async savedPayment(paymentDto: any): Promise<any> {
     try {
-
-
       const { name, email } = paymentDto.data.object.customer_details.name;
       const stripeUser: any = await this.stripe.customers.create({
         name,
@@ -59,11 +62,40 @@ export class PaymentService {
             zipCode: jobsMetadata[x]?.zipCode,
           },
           billingMethod: {
-
             type: jobsMetadata[x]?.type,
             email: jobsMetadata[x]?.email,
           },
         };
+
+
+        const mailBody = `
+        <html>
+        <head>
+          <style>
+            /* Optional: Add styling for the image */
+            .image-container {
+              text-align: center;
+            }
+            .image-container img {
+              max-width: 100%;
+              height: auto;
+            }
+          </style>
+        </head>
+        <body>
+          <div style="background-color: #4CAF50; padding: 10px; color:#FF9900;">
+            <h1>Placement Services USA, Inc.</h1>
+          </div>
+          <div class="image-container">
+            <img src="" alt="Stripe Receipt" />
+          </div>
+        </body>
+        </html>`;
+      // Set the email subject and heading
+      const mailHeading = `Placement Services USA, Inc.`;
+      const subject = `Placement Services USA, Inc.`;
+      // Send the email using the mailService.sendNewMail method
+      const mailSent = await this.mailService.sendNewMail(paymentObj.receipt_email, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
         const checkOut: any = await this.paymentRepository.create(paymentObj);
         const checkOutSaved: any = await this.paymentRepository.save(checkOut);
       }
@@ -99,7 +131,7 @@ export class PaymentService {
         state: `${object.billingAddress?.state}`,
         zipCode: `${object.billingAddress?.zipCode}`,
         type: `${object.billingMethod.type}`,
-        url: `${object.success_url}`,
+        url: `${object?.success_url}`,
       })),
     );
     const session = await this.stripe.checkout.sessions.create({
@@ -107,10 +139,9 @@ export class PaymentService {
       metadata: { Jobs: matadata },
       payment_method_types: ['card', 'us_bank_account', 'cashapp'],
       mode: 'payment',
-      success_url: `${object[0].success_url}`,
+      success_url: `${object[0]?.success_url}`,
       cancel_url: `https://placement-services-venrup.web.app/checkout`,
     });
-
     return session;
   }
 
@@ -143,8 +174,10 @@ export class PaymentService {
       // });
       // const jobsMetadata = JSON.parse(charge.data.object.metadata.Jobs);
       // Saved the Payment Data
+       let email = ''
       for (let x = 0; x < object.length; x++) {
-        const metadata = { url: object[x].success_url, city: object[x].billingAddress.city, type: object[x].billingMethod.type, email: object[x].billingMethod.email, jobId: object[x].jobId, state: object[x].billingAddress.state, userId: object[x].userId, address: "", company: object[x].billingAddress.company, zipCode: object[x].billingAddress.zipCode, lastName: object[x].billingAddress.lastName, firstName: object[x].billingAddress.firstName }
+        const metadata = { url: object[x]?.success_url, city: object[x].billingAddress.city, type: object[x].billingMethod.type, email: object[x].billingMethod.email, jobId: object[x].jobId, state: object[x].billingAddress.state, userId: object[x].userId, address: "", company: object[x].billingAddress.company, zipCode: object[x].billingAddress.zipCode, lastName: object[x].billingAddress.lastName, firstName: object[x].billingAddress.firstName }
+        email = metadata.email
         const paymentObj = {
           varify: true,
           refunded: charge.refunded,
@@ -176,13 +209,44 @@ export class PaymentService {
             zipCode: metadata?.zipCode,
           },
           billingMethod: {
-
             type: metadata?.type,
             email: metadata?.email,
           },
         };
         const checkOut: any = await this.paymentRepository.create(paymentObj);
         const checkOutSaved: any = await this.paymentRepository.save(checkOut);
+      }
+       console.log(charge,charge.receipt_url)
+       if (charge && charge.receipt_url) {
+        // Construct the email body with the receipt URL
+        const mailBody = `
+          <html>
+          <head>
+            <style>
+              /* Optional: Add styling for the image */
+              .image-container {
+                text-align: center;
+              }
+              .image-container img {
+                max-width: 100%;
+                height: auto;
+              }
+            </style>
+          </head>
+          <body>
+            <div style="background-color: #4CAF50; padding: 10px; color:#FF9900;">
+              <h1>Placement Services USA, Inc.</h1>
+            </div>
+            <div class="image-container">
+              <img src="${charge.receipt_url}" alt="Stripe Receipt" />
+            </div>
+          </body>
+          </html>`;
+        // Set the email subject and heading
+        const mailHeading = `Placement Services USA, Inc.`;
+        const subject = `Placement Services USA, Inc.`;
+        // Send the email using the mailService.sendNewMail method
+        const mailSent = await this.mailService.sendNewMail(email, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
       }
       return responseSuccessMessage('Checkout has been Done Successfully!', [], 200);
     } catch (err: any) {
