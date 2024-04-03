@@ -6,17 +6,18 @@ import { Repository } from 'typeorm';
 import { Payment } from './payment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JobService } from '../job/job.service';
-import { MailService} from '../mail/mail.service'
+import { MailService } from '../mail/mail.service'
+
 @Injectable()
 export class PaymentService {
   private stripe: Stripe;
   @InjectRepository(Payment)
   private readonly paymentRepository: Repository<Payment>;
-  
+
   constructor(private readonly jobService: JobService,
     private readonly mailService: MailService
 
-    ) {
+  ) {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2022-11-15',
     });
@@ -67,9 +68,8 @@ export class PaymentService {
           },
         };
 
-
-        const mailBody = `
-        <html>
+        const date = new Date(paymentDto.created * 1000)
+        const mailBody = `<html>
         <head>
           <style>
             /* Optional: Add styling for the image */
@@ -82,20 +82,35 @@ export class PaymentService {
             }
           </style>
         </head>
-        <body>
-          <div style="background-color: #4CAF50; padding: 10px; color:#FF9900;">
-            <h1>Placement Services USA, Inc.</h1>
+        <body style="margin-left:35%;margin-right:35%;">
+        <div style="
+       padding: 15px;
+       border:1px solid #808080;
+       border-radius:5px;
+       >
+        <img width="60" height="60" src="https://staging3.placement-services.com/wp-content/uploads/2019/11/logo.png" alt="Stripe Receipt" />
+          <div style="background-color: white; padding: 10px; color:#FF9900;">
+            <h1>My Shop</h1>
+            <p>TEST MODE</p>
           </div>
-          <div class="image-container">
-            <img src="" alt="Stripe Receipt" />
-          </div>
+          <div class="invoice-container">
+            <h2>Invoice <small>#${paymentDto.id}</small></h2>
+            <p>Payment Date: ${date.toUTCString().split(' ').slice(0, 5).join(' ')}</p>
+            <p>Amount Paid: $${paymentDto.data.object.amount_total}</p>
+            <div>
+            <a href="" target="_blank">View invoice and payment details ></a>
+          </div> 
+          </div>   
         </body>
-        </html>`;
-      // Set the email subject and heading
-      const mailHeading = `Placement Services USA, Inc.`;
-      const subject = `Placement Services USA, Inc.`;
-      // Send the email using the mailService.sendNewMail method
-      const mailSent = await this.mailService.sendNewMail(paymentObj.receipt_email, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
+      </html>`;
+        // Set the email subject and heading
+        const mailHeading = `Placement Services USA, Inc.`;
+        const subject = `Placement Services USA, Inc.`;
+        // Send the email using the mailService.sendNewMail method
+        if(jobsMetadata[0].accountHolder){
+          const mailSent = await this.mailService.sendNewMail(jobsMetadata[0].accountHolder, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
+        }
+        const mailSent = await this.mailService.sendNewMail(paymentObj.customer.email, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
         const checkOut: any = await this.paymentRepository.create(paymentObj);
         const checkOutSaved: any = await this.paymentRepository.save(checkOut);
       }
@@ -132,12 +147,13 @@ export class PaymentService {
         zipCode: `${object.billingAddress?.zipCode}`,
         type: `${object.billingMethod.type}`,
         url: `${object?.success_url}`,
+        accountHolder:object[0].accountHolder
       })),
     );
     const session = await this.stripe.checkout.sessions.create({
       line_items: lineItems,
       metadata: { Jobs: matadata },
-      payment_method_types: ['card', 'us_bank_account', 'cashapp'],
+      payment_method_types: ['us_bank_account'],
       mode: 'payment',
       success_url: `${object[0]?.success_url}`,
       cancel_url: `https://placement-services-venrup.web.app/checkout`,
@@ -174,7 +190,7 @@ export class PaymentService {
       // });
       // const jobsMetadata = JSON.parse(charge.data.object.metadata.Jobs);
       // Saved the Payment Data
-       let email = ''
+      let email = ''
       for (let x = 0; x < object.length; x++) {
         const metadata = { url: object[x]?.success_url, city: object[x].billingAddress.city, type: object[x].billingMethod.type, email: object[x].billingMethod.email, jobId: object[x].jobId, state: object[x].billingAddress.state, userId: object[x].userId, address: "", company: object[x].billingAddress.company, zipCode: object[x].billingAddress.zipCode, lastName: object[x].billingAddress.lastName, firstName: object[x].billingAddress.firstName }
         email = metadata.email
@@ -216,11 +232,9 @@ export class PaymentService {
         const checkOut: any = await this.paymentRepository.create(paymentObj);
         const checkOutSaved: any = await this.paymentRepository.save(checkOut);
       }
-       console.log(charge,charge.receipt_url)
-       if (charge && charge.receipt_url) {
-        // Construct the email body with the receipt URL
-        const mailBody = `
-          <html>
+      const date = new Date(charge.created * 1000)
+      if (charge && charge.receipt_url) {
+        const mailBody = `<html>
           <head>
             <style>
               /* Optional: Add styling for the image */
@@ -233,19 +247,34 @@ export class PaymentService {
               }
             </style>
           </head>
-          <body>
-            <div style="background-color: #4CAF50; padding: 10px; color:#FF9900;">
-              <h1>Placement Services USA, Inc.</h1>
+          <body style="margin-left:35%;margin-right:35%;">
+          <div style="
+         padding: 15px;
+         border:1px solid #808080;
+         border-radius:5px;
+         >
+          <img width="60" height="60" src="https://staging3.placement-services.com/wp-content/uploads/2019/11/logo.png" alt="Stripe Receipt" />
+            <div style="background-color: white; padding: 10px; color:#FF9900;">
+              <h1>My Shop</h1>
+              <p>TEST MODE</p>
             </div>
-            <div class="image-container">
-              <img src="${charge.receipt_url}" alt="Stripe Receipt" />
-            </div>
+            <div class="invoice-container">
+              <h2>Invoice <small>#${charge.id}</small></h2>
+              <p>Payment Date: ${date.toUTCString().split(' ').slice(0, 5).join(' ')} </p>
+              <p>Amount Paid: $${charge.amount/100}</p>
+              <div>
+              <a href="${charge.receipt_url}" target="_blank">View invoice and payment details ></a>
+            </div> 
+            </div>   
           </body>
-          </html>`;
+        </html>`;
         // Set the email subject and heading
         const mailHeading = `Placement Services USA, Inc.`;
         const subject = `Placement Services USA, Inc.`;
         // Send the email using the mailService.sendNewMail method
+        if(object[0].accountHolder){
+          const mailSent = await this.mailService.sendNewMail(object[0].accountHolder, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
+        }
         const mailSent = await this.mailService.sendNewMail(email, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
       }
       return responseSuccessMessage('Checkout has been Done Successfully!', [], 200);
@@ -253,5 +282,4 @@ export class PaymentService {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
   }
-
 }
