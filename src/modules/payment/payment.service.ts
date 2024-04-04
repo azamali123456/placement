@@ -56,11 +56,11 @@ export class PaymentService {
           billingAddress: {
             firstName: jobsMetadata[x]?.firstName,
             lastName: jobsMetadata[x]?.lastName,
-            company: jobsMetadata[x]?.company,
-            address: jobsMetadata[x]?.address,
-            city: jobsMetadata[x]?.city,
-            state: jobsMetadata[x]?.state,
-            zipCode: jobsMetadata[x]?.zipCode,
+            // company: jobsMetadata[x]?.company,
+            // address: jobsMetadata[x]?.address,
+            // city: jobsMetadata[x]?.city,
+            // state: jobsMetadata[x]?.state,
+            // zipCode: jobsMetadata[x]?.zipCode,
           },
           billingMethod: {
             type: jobsMetadata[x]?.type,
@@ -157,7 +157,7 @@ export class PaymentService {
         currency: object.currency || 'usd',
         product_data: {
           name: object.name,
-          description: object.description || '',
+          description:   object.description.replace(/<\/?p>/g, '') || '',
         },
         unit_amount: parseInt(object.amount) * 100, // amount in cents
       },
@@ -170,20 +170,16 @@ export class PaymentService {
         email: `${object.billingMethod?.email}`,
         firstName: `${object.billingAddress?.firstName}`,
         lastName: `${object.billingAddress?.lastName}`,
-        company: `${object.billingAddress?.company}`,
-        address: `${object.billingAddress?.address}`,
-        city: `${object.billingAddress?.city}`,
-        state: `${object.billingAddress?.state}`,
-        zipCode: `${object.billingAddress?.zipCode}`,
+        // company: `${object.billingAddress?.company}`,
+        // address: `${object.billingAddress?.address}`,
+        // city: `${object.billingAddress?.city}`,
+        // state: `${object.billingAddress?.state}`,
+        // zipCode: `${object.billingAddress?.zipCode}`,
         type: `${object.billingMethod.type}`,
         url: `${object?.success_url}`,
         accountHolder: `${object?.accountHolder}`
       })),
     );
-    if (object[0]?.accountHolder) {
-
-      console.log(object[0]?.accountHolder)
-    }
     const session = await this.stripe.checkout.sessions.create({
       line_items: lineItems,
       metadata: { Jobs: matadata },
