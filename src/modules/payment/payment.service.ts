@@ -71,27 +71,27 @@ export class PaymentService {
         const stripe = require('stripe')('sk_test_51NFKZLAgDjJFNJDFCKn6K3RAcVhlQ4xnm6TaKI6ddKkHdfxT3928rcB8baVoB3XCFoscIrllGpeuPjRmwWAVt6qJ00vrjPBTnF');
         const paymentIntentId = paymentDto.data?.object?.payment_intent
         let receiptUrl = '';
-        if (paymentIntentId) {
-            const paymentIntent:any = await this.stripe.paymentIntents.retrieve(paymentIntentId);
-            if (paymentIntent.status === 'succeeded') {
-                // Check if the Payment Intent is successful
-                if (paymentIntent.charges && paymentIntent.charges.data.length > 0) {
-                    // Check if charges exist
-                    receiptUrl = paymentIntent.charges.data[0].receipt_url || '';
-                } else {
-                    console.log('No charges associated with the Payment Intent');
-                }
-            } else {
-                console.log('Payment Intent is not successful');
-            }
-        }
+        // if (paymentIntentId) {
+        //     const paymentIntent:any = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+        //     if (paymentIntent.status === 'succeeded') {
+        //         // Check if the Payment Intent is successful
+        //         if (paymentIntent.charges && paymentIntent.charges.data.length > 0) {
+        //             // Check if charges exist
+        //             receiptUrl = paymentIntent.charges.data[0].receipt_url || '';
+        //         } else {
+        //             console.log('No charges associated with the Payment Intent');
+        //         }
+        //     } else {
+        //         console.log('Payment Intent is not successful');
+        //     }
+        // }
 
 
-        if (paymentIntentId) {
-          const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-           receiptUrl = paymentIntent.charges.data[0].receipt_url;
+        // if (paymentIntentId) {
+        //   const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+        //    receiptUrl = paymentIntent.charges.data[0].receipt_url;
 
-        }
+        // }
         // else if (invoiceId) {
         //   receiptUrl = `https://dashboard.stripe.com/invoices/${invoiceId}`;
         // }
