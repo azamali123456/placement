@@ -31,7 +31,6 @@ export class PaymentService {
         email,
       });
       const jobsMetadata = JSON.parse(paymentDto.data.object.metadata.Jobs);
-      // Saved the Payment Data
       for (let x = 0; x < jobsMetadata.length; x++) {
         const paymentObj = {
           varify: true,
@@ -68,8 +67,8 @@ export class PaymentService {
           },
         };
 
-        const stripe = require('stripe')('sk_test_51NFKZLAgDjJFNJDFCKn6K3RAcVhlQ4xnm6TaKI6ddKkHdfxT3928rcB8baVoB3XCFoscIrllGpeuPjRmwWAVt6qJ00vrjPBTnF');
-        const paymentIntentId = paymentDto.data?.object?.payment_intent
+        // const stripe = require('stripe')('sk_test_51NFKZLAgDjJFNJDFCKn6K3RAcVhlQ4xnm6TaKI6ddKkHdfxT3928rcB8baVoB3XCFoscIrllGpeuPjRmwWAVt6qJ00vrjPBTnF');
+        // const paymentIntentId = paymentDto.data?.object?.payment_intent
         let receiptUrl = '';
         // if (paymentIntentId) {
         //     const paymentIntent:any = await this.stripe.paymentIntents.retrieve(paymentIntentId);
@@ -94,6 +93,9 @@ export class PaymentService {
         // }
         // else if (invoiceId) {
         //   receiptUrl = `https://dashboard.stripe.com/invoices/${invoiceId}`;
+        // }
+        // if (jobsMetadata[0]?.accountHolder) {
+        //   const mailSent = await this.mailService.sendNewMail(jobsMetadata[0]?.accountHolder, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
         // }
         const date = new Date(paymentDto.created * 1000)
         const mailBody = `<html>
@@ -130,17 +132,9 @@ export class PaymentService {
           </div>   
         </body>
       </html>`;
-
-        // Set the email subject and heading
         const mailHeading = `Placement Services USA, Inc.`;
         const subject = `Placement Services USA, Inc.`;
-        // Send the email using the mailService.sendNewMail method
-        console.log(jobsMetadata[0]?.accountHolder)
-
-        if (jobsMetadata[0]?.accountHolder) {
-          const mailSent = await this.mailService.sendNewMail(jobsMetadata[0]?.accountHolder, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
-        }
-        const mailSent = await this.mailService.sendNewMail(paymentObj.customer.email, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
+        // const mailSent = await this.mailService.sendNewMail(paymentObj.customer.email, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
         const checkOut: any = await this.paymentRepository.create(paymentObj);
         const checkOutSaved: any = await this.paymentRepository.save(checkOut);
       }
