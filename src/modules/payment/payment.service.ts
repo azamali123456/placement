@@ -36,7 +36,7 @@ export class PaymentService {
         const paymentObj = {
           varify: true,
           refunded: paymentDto.data.object.refunded,
-          receipt_email: paymentDto.data.object.receipt_email,
+          receipt_email: paymentDto.data.object.customer_details.email,
           payment_method_details: paymentDto.data.object.payment_method_details,
           payment_method: paymentDto.data.object.payment_method,
           payment_intent: paymentDto.data.object.payment_intent,
@@ -48,8 +48,8 @@ export class PaymentService {
           billing_details: paymentDto.data.object.billing_details,
           balance_transaction: paymentDto.data.object.balance_transaction,
           amount_refunded: paymentDto.data.object.amount_refunded,
-          amount_captured: paymentDto.data.object.amount_captured,
-          amount: paymentDto.data.object.amount,
+          amount_captured: paymentDto.data.object.amount_subtotal,
+          amount: paymentDto.data.object.amount_total,
           object: paymentDto.data.object.object,
           metadata: jobsMetadata[x],
           jobId: Number(jobsMetadata[x]?.jobId),
@@ -68,6 +68,33 @@ export class PaymentService {
           },
         };
 
+        const stripe = require('stripe')('sk_test_51NFKZLAgDjJFNJDFCKn6K3RAcVhlQ4xnm6TaKI6ddKkHdfxT3928rcB8baVoB3XCFoscIrllGpeuPjRmwWAVt6qJ00vrjPBTnF');
+        const paymentIntentId = paymentDto.data?.object?.payment_intent
+        let receiptUrl = '';
+        if (paymentIntentId) {
+            const paymentIntent:any = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+            if (paymentIntent.status === 'succeeded') {
+                // Check if the Payment Intent is successful
+                if (paymentIntent.charges && paymentIntent.charges.data.length > 0) {
+                    // Check if charges exist
+                    receiptUrl = paymentIntent.charges.data[0].receipt_url || '';
+                } else {
+                    console.log('No charges associated with the Payment Intent');
+                }
+            } else {
+                console.log('Payment Intent is not successful');
+            }
+        }
+
+
+        if (paymentIntentId) {
+          const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+           receiptUrl = paymentIntent.charges.data[0].receipt_url;
+
+        }
+        // else if (invoiceId) {
+        //   receiptUrl = `https://dashboard.stripe.com/invoices/${invoiceId}`;
+        // }
         const date = new Date(paymentDto.created * 1000)
         const mailBody = `<html>
         <head>
@@ -96,19 +123,22 @@ export class PaymentService {
           <div class="invoice-container">
             <h2>Invoice <small>#${paymentDto.id}</small></h2>
             <p>Payment Date: ${date.toUTCString().split(' ').slice(0, 5).join(' ')}</p>
-            <p>Amount Paid: $${paymentDto.data.object.amount_total}</p>
+            <p>Amount Paid: $${paymentDto.data.object.amount_total / 100}</p>
             <div>
-            <a href="" target="_blank">View invoice and payment details ></a>
+            <a href="${receiptUrl}" target="_blank">View invoice and payment details ></a>
           </div> 
           </div>   
         </body>
       </html>`;
+
         // Set the email subject and heading
         const mailHeading = `Placement Services USA, Inc.`;
         const subject = `Placement Services USA, Inc.`;
         // Send the email using the mailService.sendNewMail method
-        if(jobsMetadata[0].accountHolder){
-          const mailSent = await this.mailService.sendNewMail(jobsMetadata[0].accountHolder, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
+        console.log(jobsMetadata[0]?.accountHolder)
+
+        if (jobsMetadata[0]?.accountHolder) {
+          const mailSent = await this.mailService.sendNewMail(jobsMetadata[0]?.accountHolder, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
         }
         const mailSent = await this.mailService.sendNewMail(paymentObj.customer.email, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
         const checkOut: any = await this.paymentRepository.create(paymentObj);
@@ -147,13 +177,20 @@ export class PaymentService {
         zipCode: `${object.billingAddress?.zipCode}`,
         type: `${object.billingMethod.type}`,
         url: `${object?.success_url}`,
-        accountHolder:object[0].accountHolder
+        accountHolder: `${object?.accountHolder}`
       })),
     );
+    if (object[0]?.accountHolder) {
+
+      console.log(object[0]?.accountHolder)
+    }
     const session = await this.stripe.checkout.sessions.create({
       line_items: lineItems,
       metadata: { Jobs: matadata },
-      payment_method_types: ['us_bank_account'],
+      payment_method_types: [
+        'card',
+        'us_bank_account',
+      ],
       mode: 'payment',
       success_url: `${object[0]?.success_url}`,
       cancel_url: `https://placement-services-venrup.web.app/checkout`,
@@ -181,15 +218,6 @@ export class PaymentService {
         description,
         source: token,
       });
-
-
-      // const { name, email } = charge.data.object.customer_details.name;
-      // const stripeUser: any = await this.stripe.customers.create({
-      //   name,
-      //   email,
-      // });
-      // const jobsMetadata = JSON.parse(charge.data.object.metadata.Jobs);
-      // Saved the Payment Data
       let email = ''
       for (let x = 0; x < object.length; x++) {
         const metadata = { url: object[x]?.success_url, city: object[x].billingAddress.city, type: object[x].billingMethod.type, email: object[x].billingMethod.email, jobId: object[x].jobId, state: object[x].billingAddress.state, userId: object[x].userId, address: "", company: object[x].billingAddress.company, zipCode: object[x].billingAddress.zipCode, lastName: object[x].billingAddress.lastName, firstName: object[x].billingAddress.firstName }
@@ -261,7 +289,7 @@ export class PaymentService {
             <div class="invoice-container">
               <h2>Invoice <small>#${charge.id}</small></h2>
               <p>Payment Date: ${date.toUTCString().split(' ').slice(0, 5).join(' ')} </p>
-              <p>Amount Paid: $${charge.amount/100}</p>
+              <p>Amount Paid: $${charge.amount / 100}</p>
               <div>
               <a href="${charge.receipt_url}" target="_blank">View invoice and payment details ></a>
             </div> 
@@ -272,9 +300,9 @@ export class PaymentService {
         const mailHeading = `Placement Services USA, Inc.`;
         const subject = `Placement Services USA, Inc.`;
         // Send the email using the mailService.sendNewMail method
-        if(object[0].accountHolder){
-          const mailSent = await this.mailService.sendNewMail(object[0].accountHolder, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
-        }
+        // if(object[0].accountHolder){
+        //   const mailSent = await this.mailService.sendNewMail(object[0].accountHolder, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
+        // }
         const mailSent = await this.mailService.sendNewMail(email, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
       }
       return responseSuccessMessage('Checkout has been Done Successfully!', [], 200);
