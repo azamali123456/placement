@@ -28,3 +28,8 @@ export enum CategoryCalculation {
   KG = 'MUND',
   BAG = 'BAG',
 }
+
+export enum userType {
+  EMPLOYER = 'Employer',
+  ADMIN = 'ADMIN',
+}
