@@ -32,24 +32,27 @@ export class JobController {
     if (body.status === JobStatus.SAVED) {
       // As Job status SAVED then Job Number will not be created!
       delete body.jobNumber
-          }
+    }
     if (body.status === JobStatus.SUBMITTED) {
       // Note : Job Number will be created in SUBMITTED Jobs
       const randomNum = Math.random() * 9000
-      body.jobNumber =  Math.floor(1000 + randomNum)
-          }
+      body.jobNumber = Math.floor(1000 + randomNum)
+    }
     if (body.status === JobStatus.PUBLISHED) {
       // As Job status PULISHED varify will be true!
       body.varify = true
-          }
+    }
     return this.jobService.createJob(body);
   }
 
   //My Job list
+  // @Auth(Action.Update,'EMPLOYER')
   @Get('/list')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: Job, description: 'Job List', })
-  async getJob() {
+  async getJob(
+    // @AuthUser() userInfo: any
+  ) {
     return this.jobService.getJobsList();
   }
 
@@ -61,14 +64,14 @@ export class JobController {
     return this.jobService.deleteJob(id);
   }
 
-    //Get Add To Cart Jobs List 
-    // @Get('/get-AddToCard-list')
-    // @HttpCode(HttpStatus.OK)
-    // @Auth(Action.Read, 'job')
-    // @ApiOkResponse({ type: Job, description: 'Delete A Job', })
-    // async getAddToCardList(@AuthUser() userInfo: any) {
-    //   return this.jobService.getAddToCardList(userInfo.id);
-    // }
+  //Get Add To Cart Jobs List 
+  // @Get('/get-AddToCard-list')
+  // @HttpCode(HttpStatus.OK)
+  
+  // @ApiOkResponse({ type: Job, description: 'Delete A Job', })
+  // async getAddToCardList(@AuthUser() userInfo: any) {
+  //   return this.jobService.getAddToCardList(userInfo.id);
+  // }
 
   // Get My Jobs List by Status (SAVED,SUBMITTED,PUBLISHED )
   @Get('/list/status')
@@ -111,8 +114,8 @@ export class JobController {
     if (body.status === JobStatus.SUBMITTED) {
       // Note : Job Number will be created in SUBMITTED Jobs
       const randomNum = Math.random() * 9000
-      body.jobNumber =  Math.floor(1000 + randomNum)
-          }
+      body.jobNumber = Math.floor(1000 + randomNum)
+    }
     if (body.status === JobStatus.PUBLISHED) {
       // As Job status PULISHED varify will be true!
       body.varify = true
@@ -122,25 +125,25 @@ export class JobController {
   }
 
 
- 
-
-   // Add To Cart 
-   @Auth(Action.Read, 'User')
-   @Patch('/update/status')
-   @ApiOkResponse({ description: 'Update Job Status', type: Job, })
-   async updateAddToCart(@Query('id') id: number,@Body() body: any, @AuthUser() userInfo: any) {
-     const userId = userInfo.id
-     return this.jobService.updateJobStatus(id, body, userId);
-   }
 
 
-   @Auth(Action.Read, 'User')
-   @Patch('/update/status/all')
-   @ApiOkResponse({ description: 'Update Job Status', type: Job, })
-   async updateStatus(@Body() body: any, @AuthUser() userInfo: any) {
-     const userId = userInfo.id
-     return this.jobService.updateAllJobsStstus(body, userId);
-   }
+  // Add To Cart 
+  @Auth(Action.Read, 'User')
+  @Patch('/update/status')
+  @ApiOkResponse({ description: 'Update Job Status', type: Job, })
+  async updateAddToCart(@Query('id') id: number, @Body() body: any, @AuthUser() userInfo: any) {
+    const userId = userInfo.id
+    return this.jobService.updateJobStatus(id, body, userId);
+  }
+
+
+  @Auth(Action.Read, 'User')
+  @Patch('/update/status/all')
+  @ApiOkResponse({ description: 'Update Job Status', type: Job, })
+  async updateStatus(@Body() body: any, @AuthUser() userInfo: any) {
+    const userId = userInfo.id
+    return this.jobService.updateAllJobsStstus(body, userId);
+  }
 
 
   // Find And Update Jobs

@@ -16,13 +16,13 @@ export class CaslAbilityFactory {
       Ability as AbilityClass<AppAbility>,
     );
     const caslPermissions = [];
-    if (user.role == 'Employeer') {
-      can(Action.Manage, 'all'); // read-write access to everything
-      caslPermissions.push({ action: Action.Manage, subject: 'all' });
+    if (user.role === 'ADMIN') {
+      can(Action.Manage, 'all');
+     caslPermissions.push({ action: Action.Manage, subject: 'all' });
+
     } else {
-      //const dbPermissions = [{action:'Read',subject:'User'},{action:'Delete',subject:'Cat'},]
-      //can(Action.Update, Article, { authorId: user.id });
-      //cannot(Action.Delete, Article, { isPublished: true });
+      can(Action.Manage, 'all', { inverted: true });
+      caslPermissions.push({ action: Action.Manage, subject: 'all' });
     }
 
     return new Ability<[Action, Subjects]>(caslPermissions);

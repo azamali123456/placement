@@ -8,6 +8,7 @@ import {
   IsOptional,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { userType } from 'src/constants';
 @Entity()
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
@@ -69,7 +70,7 @@ export class User extends BaseEntity {
   @IsNotEmpty({ message: 'zipCode should not be empty' })
   zipCode: number;
 
-  @Column({ default: 'Employeer' })
+  @Column({ default: userType.EMPLOYER })
   @IsString()
   @IsOptional()
   role?: string;
