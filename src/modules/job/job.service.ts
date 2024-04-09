@@ -94,6 +94,9 @@ export class JobService {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
   }
+
+
+ 
   // Delete A Job
   async deleteJob(id: any): Promise<any> {
     try {
@@ -157,6 +160,64 @@ export class JobService {
   //     throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
   //   }
   // }
+
+
+  // Get My submitted Jobs list
+  async GetMySubmittedJobs(): Promise<any> {
+    try {
+      const status = 'SUBMITTED'
+      const data: any = await this.jobRepository
+        .createQueryBuilder('job')
+        .leftJoinAndSelect('job.employerInfo', 'employerInfo')
+        .leftJoinAndSelect('job.payments', 'payment')
+        .leftJoinAndSelect('job.packages', 'packages')
+        .select([
+          'job.id',
+          'job.packagesId',
+          'job.userId',
+          'job.jobTitle',
+          'job.multiPosition',
+          'job.discription',
+          'job.jobType',
+          'job.jobNumber',
+          'job.toApplyStatus',
+          'job.toApplyText',
+          'job.varify',
+          'job.educationAndExperience',
+          'job.specialSkills',
+          'job.travelRequirements',
+          'job.remoteJob',
+          'job.salary',
+          'job.submittedDate',
+          'job.jobDuration',
+          'job.startDate',
+          'job.endDate',
+          'job.requiredSkills',
+          'job.status',
+          'job.specialInstructions',
+          'job.recruitmentFirm',
+          'job.referenceCode',
+          'employerInfo.id',
+          'employerInfo.companyName',
+          'employerInfo.noOfEmployee',
+          'employerInfo.hiringManager',
+          'employerInfo.hiringManagerTitle',
+          'employerInfo.companyNature',
+          'employerInfo.worksiteStreet',
+          'employerInfo.worksiteCity',
+          'employerInfo.worksiteZipCode',
+          'employerInfo.state',
+          'payment',
+          'packages',
+        ])
+        .andWhere('job.status = :status', { status })
+        .orderBy('job.id', 'DESC')
+        .getMany();
+      return responseSuccessMessage(`Your Submitted Jobs list`, data, 200);
+    } catch (err) {
+      throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
+    }
+  }
 
   // Get My Jobs List by Status (SAVED,SUBMITTED,PUBLISHED)
   async GetMySavedJobs(userId: any, status: any): Promise<any> {

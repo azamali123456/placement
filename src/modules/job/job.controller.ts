@@ -56,6 +56,18 @@ export class JobController {
     return this.jobService.getJobsList();
   }
 
+  //Get All Submitted Jobs list
+  @Auth(Action.Update,'update')
+  @Get('/submitted/list')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: Job, description: 'Submiited Jobs List', })
+  async getSubmittedJobs(@AuthUser() userInfo: any) {
+     if(userInfo.role === 'EMPLOYER'){
+      throw new HttpException("Forbidden resource", ResponseCode.FORBIDDEN);
+     }
+    return this.jobService.GetMySubmittedJobs();
+  }
+
   //Remove A Job 
   @Delete('/reamove')
   @HttpCode(HttpStatus.OK)
@@ -67,7 +79,7 @@ export class JobController {
   //Get Add To Cart Jobs List 
   // @Get('/get-AddToCard-list')
   // @HttpCode(HttpStatus.OK)
-  
+
   // @ApiOkResponse({ type: Job, description: 'Delete A Job', })
   // async getAddToCardList(@AuthUser() userInfo: any) {
   //   return this.jobService.getAddToCardList(userInfo.id);
