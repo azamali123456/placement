@@ -13,6 +13,7 @@ export enum ResponseCode {
   CONTENT_NOT_FOUND = 204,
   BAD_REQUEST = 400,
   UNAUTHORIZED = 401,
+  FORBIDDEN = 403,
   ALREADY_EXIST = 409,
 }
 
