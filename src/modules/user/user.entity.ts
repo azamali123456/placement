@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, BaseEntity, BeforeInsert } from 'typeorm';
 import {
   IsInt,
   IsDefined,
@@ -74,4 +74,14 @@ export class User extends BaseEntity {
   @IsString()
   @IsOptional()
   role?: string;
+
+  @ApiProperty()
+  @Column({ type: 'date', nullable: true })
+  registerDate: Date;
+
+
+  @BeforeInsert()
+  setDefaultSubmittedDate() {
+    this.registerDate = new Date();
+  }
 }
