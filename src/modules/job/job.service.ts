@@ -2,7 +2,7 @@ import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nes
 import { EmployerService } from '../employer/employer.service';
 import { responseSuccessMessage } from '../../constants/responce';
 import { Job } from '../job/job.entity';
-import { Like, Repository, getConnection, getRepository } from 'typeorm';
+import { LessThanOrEqual, Like, MoreThanOrEqual, Repository, getConnection, getRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ResponseCode } from 'src/exceptions';
 import { excludingWords } from "../../constants/job-search"
@@ -390,6 +390,102 @@ export class JobService {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
   }
+
+
+
+  // Search submitted Jobs
+  async SearchSubmittedJob(
+    keyword: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<any> {
+    if (!keyword && !startDate && !endDate) {
+      throw new HttpException('Either keyword or date range must be provided', ResponseCode.BAD_REQUEST);
+    }
+  
+    try {
+      let where1: any[] = [];
+  
+      if (keyword) {
+        where1.push(
+          {
+            jobTitle: Like(`%${keyword}%`),
+            status: JobStatus.SUBMITTED,
+          },
+          {
+            discription: Like(`%${keyword}%`),
+            status: JobStatus.SUBMITTED,
+          }
+        );
+      }
+  
+
+
+      if (startDate && endDate) {
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        endDateObj.setHours(23, 59, 59, 999); // Set end of day for endDate
+        where1.push({
+          startDate: MoreThanOrEqual(startDateObj),
+          endDate: LessThanOrEqual(endDateObj),
+        });
+      }
+      if (!startDate && endDate) {
+        const endDateObj = new Date(endDate);
+        endDateObj.setHours(23, 59, 59, 999); // Set end of day for endDate
+        where1.push({
+          endDate: LessThanOrEqual(endDateObj),
+        });
+      }
+        if (startDate && !endDate) {
+        const startDateObj = new Date(startDate);
+        where1.push({
+          startDate: MoreThanOrEqual(startDateObj),
+        });
+      }
+  
+      // Handle the case where both startDate and endDate are provided
+
+  
+      if (where1.length === 0) {
+        throw new HttpException('Invalid keyword or date range', ResponseCode.BAD_REQUEST);
+      }
+  
+      let result = await this.jobRepository.find({
+        where: where1,
+        relations: ['employerInfo','payments'],
+        // .leftJoinAndSelect('job.employerInfo', 'employerInfo')
+        // .leftJoinAndSelect('job.payments', 'payment')
+        select: [
+          'id',
+          'packagesId',
+          'jobNumber',
+          'endDate',
+          'startDate',
+          'userId',
+          'jobTitle',
+          'multiPosition',
+          'discription',
+          'educationAndExperience',
+          'specialSkills',
+          'travelRequirements',
+          'remoteJob',
+          'varify',
+          'jobType',
+          'salary',
+          'jobDuration',
+          'requiredSkills',
+          'status',
+        ],
+      });
+  
+      return result;
+    } catch (err) {
+      throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
+    }
+  }
+  
+  
   // Find A Job
   async FindOne(id: number): Promise<any> {
     try {
