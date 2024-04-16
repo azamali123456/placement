@@ -40,7 +40,7 @@ export class UserController {
     } else {
       sortOrder = 'DESC'
     }
-    return this.userService.getSortedList(sortBy, sortOrder,keyword);
+    return this.userService.getSortedList(sortBy,sortOrder,keyword);
   }
 
 

@@ -100,12 +100,24 @@ export class JobController {
   @Get('/search')
   @ApiQuery({ name: 'keyword', required: false })
   @ApiQuery({ name: 'city', required: false })
-  async updateJob(
+  async saerchJob(
     @Query('keyword') keyword: string,
     @Query('city') city: string,
     @Query('state') state: string
   ) {
     return this.jobService.SearchJob(keyword, city, state);
+  }
+
+
+  @Get('/search/submited')
+  @ApiQuery({ name: 'keyword', required: false })
+  @ApiQuery({ name: 'city', required: false })
+  async saerchSubmittedJob(
+    @Query('keyword') keyword: string,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string
+  ) {
+    return this.jobService.SearchSubmittedJob(keyword, startDate, endDate);
   }
 
   // Search For Jobs
