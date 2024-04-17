@@ -177,8 +177,39 @@ export class Job extends BaseEntity {
   @JoinColumn({ name: 'packagesId' })
   packages!: Pakages;
 
+  @ApiProperty()
+  @Column({ type: 'json', nullable: false })
+  agentData: object;
 
 
+  @ApiProperty()
+  @Column({nullable: false,})
+  @IsOptional()
+  invoiceCopyTo!: string;
+
+  
+  @ApiProperty()
+  @Column({nullable: false,})
+  @IsOptional()
+  PSUSA_status!: string;
+
+
+  @ApiProperty()
+  @Column({nullable: false,})
+  @IsBoolean()
+  @IsOptional()
+  resumeTo_PSUSA!: boolean;
+
+
+  @ApiProperty()
+  @IsOptional()
+  @Column({
+    type: 'date',
+    default: null, // Set the default to null
+    nullable: false, // Allow the column to be nullable
+  })
+  storeDate: Date;
+  
 
   @BeforeInsert()
   setDefaultSubmittedDate() {
