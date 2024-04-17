@@ -120,6 +120,12 @@ export class JobController {
     return this.jobService.SearchSubmittedJob(keyword, startDate, endDate);
   }
 
+
+  @Patch('/varification')
+  async jobVarification(@Query('id') id: number,@Body() body: any,) {
+    return this.jobService.JobVarifivcation(id,body);
+  }
+
   // Search For Jobs
   @Get('/findone')
   async findOne(@Query('id') id: number) {

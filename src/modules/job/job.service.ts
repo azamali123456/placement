@@ -96,7 +96,7 @@ export class JobService {
   }
 
 
- 
+
   // Delete A Job
   async deleteJob(id: any): Promise<any> {
     try {
@@ -207,11 +207,16 @@ export class JobService {
           'employerInfo.worksiteCity',
           'employerInfo.worksiteZipCode',
           'employerInfo.state',
+          'job.agentData',
+          'job.invoiceCopyTo',
+          'job.PSUSA_status',
+          'job.resumeTo_PSUSA',
+          'job.storeDate',
           'payment',
           'packages',
         ])
         .andWhere('job.status = :status', { status })
-        .orderBy('job.id', 'DESC')
+        .orderBy('job.startDate', 'DESC')
         .getMany();
       return responseSuccessMessage(`Your Submitted Jobs list`, data, 200);
     } catch (err) {
@@ -402,10 +407,10 @@ export class JobService {
     if (!keyword && !startDate && !endDate) {
       throw new HttpException('Either keyword or date range must be provided', ResponseCode.BAD_REQUEST);
     }
-  
+
     try {
       let where1: any[] = [];
-  
+
       if (keyword) {
         where1.push(
           {
@@ -415,10 +420,14 @@ export class JobService {
           {
             discription: Like(`%${keyword}%`),
             status: JobStatus.SUBMITTED,
+          },
+          {
+            jobNumber: Like(`%${keyword}%`),
+            status: JobStatus.SUBMITTED,
           }
         );
       }
-  
+
 
 
       if (startDate && endDate) {
@@ -437,23 +446,23 @@ export class JobService {
           endDate: LessThanOrEqual(endDateObj),
         });
       }
-        if (startDate && !endDate) {
+      if (startDate && !endDate) {
         const startDateObj = new Date(startDate);
         where1.push({
           startDate: MoreThanOrEqual(startDateObj),
         });
       }
-  
+
       // Handle the case where both startDate and endDate are provided
 
-  
+
       if (where1.length === 0) {
         throw new HttpException('Invalid keyword or date range', ResponseCode.BAD_REQUEST);
       }
-  
+
       let result = await this.jobRepository.find({
         where: where1,
-        relations: ['employerInfo','payments'],
+        relations: ['employerInfo', 'payments'],
         // .leftJoinAndSelect('job.employerInfo', 'employerInfo')
         // .leftJoinAndSelect('job.payments', 'payment')
         select: [
@@ -478,14 +487,31 @@ export class JobService {
           'status',
         ],
       });
-  
+
       return result;
     } catch (err) {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
   }
-  
-  
+
+
+  // Jobs Varification
+  async JobVarifivcation(id: any, jobDto: any): Promise<any> {
+    try {
+      let job: any = await this.FindOne(Number(id))
+      if (job.data.length === 0) {
+        throw new HttpException('No Job found!', ResponseCode.BAD_REQUEST);
+      } else {
+        const Job = await this.jobRepository.update({ id: id }, jobDto)
+        let updatedJob: any = await this.FindOne(id)
+        return responseSuccessMessage('Job Varified Successfull', updatedJob.data[0], 200);
+      }
+    } catch (err) {
+      throw new HttpException(err.message, err.status);
+    }
+  }
+
+
   // Find A Job
   async FindOne(id: number): Promise<any> {
     try {
@@ -537,7 +563,6 @@ export class JobService {
         throw new HttpException('No Job found!', ResponseCode.BAD_REQUEST);
       } else {
         if (userId === job.data[0].userId) {
-
           const employerInfo: any = jobDto.employerInfo
           delete jobDto.employerInfo
           // If startDate and jobDuration comes then both will updated if else....
