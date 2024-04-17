@@ -433,7 +433,7 @@ export class JobService {
       if (startDate && endDate) {
         const startDateObj = new Date(startDate);
         const endDateObj = new Date(endDate);
-        endDateObj.setHours(23, 59, 59, 999); // Set end of day for endDate
+        // endDateObj.setHours(23, 59, 59, 999); // Set end of day for endDate
         where1.push({
           startDate: MoreThanOrEqual(startDateObj),
           endDate: LessThanOrEqual(endDateObj),
