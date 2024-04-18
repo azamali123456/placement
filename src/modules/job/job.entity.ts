@@ -183,19 +183,19 @@ export class Job extends BaseEntity {
 
 
   @ApiProperty()
-  @Column({nullable: false,})
+  @Column()
   @IsOptional()
   invoiceCopyTo!: string;
 
   
   @ApiProperty()
-  @Column({nullable: false,})
+  @Column()
   @IsOptional()
   PSUSA_status!: string;
 
 
   @ApiProperty()
-  @Column({nullable: false,})
+  @Column()
   @IsBoolean()
   @IsOptional()
   resumeTo_PSUSA!: boolean;
@@ -205,8 +205,7 @@ export class Job extends BaseEntity {
   @IsOptional()
   @Column({
     type: 'date',
-    default: null, // Set the default to null
-    nullable: false, // Allow the column to be nullable
+    nullable: true, // Allow the column to be nullable
   })
   storeDate: Date;
   

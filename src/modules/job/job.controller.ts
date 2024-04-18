@@ -121,6 +121,26 @@ export class JobController {
   }
 
 
+  @Get('/sorted/list')
+  @HttpCode(HttpStatus.OK)
+  @Auth(Action.Read, 'User')
+  @ApiOkResponse({ type: Job, description: 'Users list' })
+  getSortedList(@AuthUser() user: any,
+    @Query('sortBy') sortBy: string,
+    @Query('sortOrder') sortOrder: string,
+    @Query('keyword') keyword: string,
+  ): any {
+    if (sortOrder == 'ascend') {
+      sortOrder = 'ASC'
+    } else {
+      sortOrder = 'DESC'
+    }
+    return this.jobService.getSortedList(sortBy,sortOrder,keyword);
+  }
+
+
+
+
   @Patch('/varification')
   async jobVarification(@Query('id') id: number,@Body() body: any,) {
     return this.jobService.JobVarifivcation(id,body);
