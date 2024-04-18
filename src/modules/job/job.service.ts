@@ -217,7 +217,7 @@ export class JobService {
           'packages',
         ])
         .andWhere('job.status = :status', { status })
-        .orderBy('job.startDate', 'DESC')
+        .orderBy('job.submittedDate', 'DESC')
         .getMany();
       return responseSuccessMessage(`Your Submitted Jobs list`, data, 200);
     } catch (err) {
