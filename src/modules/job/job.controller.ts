@@ -29,19 +29,21 @@ export class JobController {
   @ApiBody({ description: 'Registered Your Job. <br/><strong>Note:</strong> If salary not mention then it will be 0 , status will be only one of these [SAVED,SUBMITTED,PUBLISHED]. jobDuration Must be 1 and not greater the 30 Days. ', type: Job })
   async createJob(@Body() body: any, @AuthUser() userInfo: any) {
     body.userId = userInfo.id;
-    if (body.status === JobStatus.SAVED) {
-      // As Job status SAVED then Job Number will not be created!
-      delete body.jobNumber
-    }
-    if (body.status === JobStatus.SUBMITTED) {
-      // Note : Job Number will be created in SUBMITTED Jobs
+    
+      // As Job status SAVED then Job Number will not be created
       const randomNum = Math.random() * 9000
       body.jobNumber = Math.floor(1000 + randomNum)
-    }
-    if (body.status === JobStatus.PUBLISHED) {
-      // As Job status PULISHED varify will be true!
-      body.varify = true
-    }
+
+  
+    // if (body.status === JobStatus.SUBMITTED) {
+    //   // Note : Job Number will be created in SUBMITTED Jobs
+    //   const randomNum = Math.random() * 9000
+    //   body.jobNumber = Math.floor(1000 + randomNum)
+    // }
+    // if (body.status === JobStatus.PUBLISHED) {
+    //   // As Job status PULISHED varify will be true!
+    //   body.varify = true
+    // }
     return this.jobService.createJob(body);
   }
 
