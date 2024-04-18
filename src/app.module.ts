@@ -33,7 +33,7 @@ import {PakagesModule } from './modules/pakages/pakages.module'
     // database: 'placementservicesdb',
       synchronize: true,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      // "logging": true
+      //  "logging": true
     }),
     PaymentModule,
     // QuickbookModule,

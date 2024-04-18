@@ -494,6 +494,64 @@ export class JobService {
     }
   }
 
+  async getSortedList(
+    sortBy: string,
+    sortOrder: any,
+    keyword: string
+): Promise<any> {
+    try {
+        let orderOptions: { [key: string]: 'ASC' | 'DESC' } = {};
+
+        // Define the default sorting order for each field
+        const defaultSortOrder: { [key: string]: 'ASC' | 'DESC' } = {
+            startDate: 'ASC',
+            endDate: 'ASC',
+            storeDate: 'ASC',
+            jobTitle: 'ASC',
+            jobNumber:'ASC',
+            agent: 'ASC',
+        };
+
+        // Toggle sorting order if the same field is clicked again
+        if (sortBy && sortOrder && defaultSortOrder[sortBy]) {
+          if(sortBy == 'agent'){
+            orderOptions[`agentData.${sortBy}`] = sortOrder;
+          }else{
+            orderOptions[sortBy] = sortOrder;
+
+          }
+        } else {
+            // Use the default sorting order for the selected field
+            orderOptions = { [sortBy]: defaultSortOrder[sortBy] };
+        }
+
+        // Define search criteria based on the keyword
+        let searchCriteria = {};
+
+        if (keyword) {
+            searchCriteria = {
+                where: [
+                    { jobTitle: Like(`%${keyword}%`) },
+                    { jobNumber: Like(`%${keyword}%`) }
+
+                ],
+            };
+        }
+
+        // Fetch sorted jobs from the database based on the generated order options and search criteria
+        const jobs: any[] = await this.jobRepository.find({
+            ...searchCriteria,
+            order: orderOptions,
+        });
+
+        // Remove sensitive information before sending the response
+
+        return responseSuccessMessage('Sorted Jobs List!', jobs, 200);
+    } catch (err) {
+        throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
+    }
+}
+
 
   // Jobs Varification
   async JobVarifivcation(id: any, jobDto: any): Promise<any> {
