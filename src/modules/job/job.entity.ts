@@ -7,6 +7,7 @@ import {
   JoinColumn,
   BeforeInsert,
   OneToMany,
+  CreateDateColumn,
 } from 'typeorm';
 import { JobStatus } from '../../constants/module-contants';
 import { IsInt, Min, Max, IsBoolean, IsOptional } from 'class-validator';
@@ -205,7 +206,7 @@ export class Job extends BaseEntity {
   @IsOptional()
   @Column({
     type: 'date',
-    nullable: true, // Allow the column to be nullable
+    nullable: false, // Allow the column to be nullable
   })
   storeDate: Date;
   
@@ -213,6 +214,7 @@ export class Job extends BaseEntity {
   @ApiProperty()
   @Column({ type: 'json', nullable: false })
   diaplayItem: any;
+
 
   @BeforeInsert()
   setDefaultSubmittedDate() {
