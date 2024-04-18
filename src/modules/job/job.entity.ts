@@ -210,6 +210,10 @@ export class Job extends BaseEntity {
   storeDate: Date;
   
 
+  @ApiProperty()
+  @Column({ type: 'json', nullable: false })
+  diaplayItem: any;
+
   @BeforeInsert()
   setDefaultSubmittedDate() {
     this.submittedDate = new Date();
