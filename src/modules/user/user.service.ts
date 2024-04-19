@@ -6,8 +6,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { responseSuccessMessage } from 'src/constants/responce';
-import { EntityManager, EntityRepository } from 'typeorm';
-import { RevisedPasswordDto } from './dto/account-revised-password.dto'
+import { EntityManager } from 'typeorm';
+import { RevisedPasswordDto } from './dto/account-revised-password.dto';
 
 @Injectable()
 export class UserService {
@@ -15,7 +15,7 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly entityManager: EntityManager,
-  ) { }
+  ) {}
   // Find By Email
   async findByEmail(
     options: Partial<{ users_email: string }>,
@@ -36,7 +36,6 @@ export class UserService {
    *
    */
   async createUser(userRegisterDto: Partial<User>): Promise<any> {
-
     try {
       // Check User Email duplication!
       const hashedPassword = await bcrypt.hash(
@@ -48,7 +47,10 @@ export class UserService {
       return await this.entityManager.save(User, userRegisterDto);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
-        throw new HttpException('This email address already exists.', ResponseCode.BAD_REQUEST);
+        throw new HttpException(
+          'This email address already exists.',
+          ResponseCode.BAD_REQUEST,
+        );
       } else {
         const create = await this.userRepository.create(userRegisterDto);
         await this.userRepository.save(create).catch((err) => {
@@ -57,7 +59,6 @@ export class UserService {
         return create;
       }
     }
-
   }
   // Fond One User
   async findOne(findData: any): Promise<User | null> {
@@ -73,7 +74,7 @@ export class UserService {
   // Reset Password
   async resetPassword(userDto: User, userId: any): Promise<any> {
     try {
-      let user: any = await this.userRepository.findOne({
+      const user: any = await this.userRepository.findOne({
         where: { id: userId },
       });
       if (user === null) {
@@ -100,11 +101,11 @@ export class UserService {
   // Update User
   async updateUser(id: any, userDto: User): Promise<any> {
     try {
-      const updated: any = await this.userRepository.update(id, userDto);
+      await this.userRepository.update(id, userDto);
       const updatedUser: any = await this.userRepository.findOne({
-        where: { "id": id },
+        where: { id: id },
       });
-      delete updatedUser.users_password
+      delete updatedUser.users_password;
       return responseSuccessMessage(
         'Account updated successfully!',
         updatedUser,
@@ -115,25 +116,32 @@ export class UserService {
     }
   }
   // Account Revised Password
-  async rewisedPassword(id: any, passwordDto: RevisedPasswordDto): Promise<any> {
+  async rewisedPassword(
+    id: any,
+    passwordDto: RevisedPasswordDto,
+  ): Promise<any> {
     try {
       const user: any = await this.userRepository.findOne({
-        where: { "id": id },
+        where: { id: id },
       });
-      if (await bcrypt.compare(passwordDto.current_password, user.users_password)) {
-        const hashedPassword = await bcrypt.hash(
-          passwordDto.new_password,
-          10,
-        );
-        const updated: any = await this.userRepository.update(id, { users_password: hashedPassword });
-        delete user.users_password
+      if (
+        await bcrypt.compare(passwordDto.current_password, user.users_password)
+      ) {
+        const hashedPassword = await bcrypt.hash(passwordDto.new_password, 10);
+        await this.userRepository.update(id, {
+          users_password: hashedPassword,
+        });
+        delete user.users_password;
         return responseSuccessMessage(
           'Account Password updated successfully!',
           user,
           200,
         );
       } else {
-        throw new HttpException('Incorrect current Password!', ResponseCode.BAD_REQUEST);
+        throw new HttpException(
+          'Incorrect current Password!',
+          ResponseCode.BAD_REQUEST,
+        );
       }
     } catch (err) {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
@@ -148,12 +156,8 @@ export class UserService {
           registerDate: 'DESC',
         },
       });
-      users.forEach(user => delete user.users_password);
-      return responseSuccessMessage(
-        'Users List!',
-        users,
-        200,
-      );
+      users.forEach((user) => delete user.users_password);
+      return responseSuccessMessage('Users List!', users, 200);
     } catch (err) {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
@@ -164,11 +168,11 @@ export class UserService {
   async getSortedList(
     sortBy: string,
     sortOrder: any,
-    keyword: string
+    keyword: string,
   ): Promise<any> {
     try {
       let orderOptions: { [key: string]: 'ASC' | 'DESC' } = {};
-    
+
       // Define the default sorting order for each field
       const defaultSortOrder: { [key: string]: 'ASC' | 'DESC' } = {
         firstName: 'ASC',
@@ -178,7 +182,7 @@ export class UserService {
         phone: 'ASC',
         registerDate: 'DESC', // Default to sorting by registration date in descending order
       };
-    
+
       // Toggle sorting order if the same field is clicked again
       if (sortBy && sortOrder && defaultSortOrder[sortBy]) {
         orderOptions[sortBy] = sortOrder === 'ASC' ? 'DESC' : 'ASC';
@@ -186,34 +190,30 @@ export class UserService {
         // Use the default sorting order for the selected field
         orderOptions = { [sortBy]: defaultSortOrder[sortBy] };
       }
-  
+
       // Define search criteria based on the keyword
       const searchCriteria = [
         { firstName: Like(`%${keyword}%`) },
         { lastName: Like(`%${keyword}%`) },
         { users_email: Like(`%${keyword}%`) },
       ];
-    
+
       // Fetch sorted users from the database based on the generated order options and search criteria
       const users: any[] = await this.userRepository.find({
         where: searchCriteria,
         order: orderOptions,
       });
-    
+
       // Remove sensitive information before sending the response
-      users.forEach(user => delete user.users_password);
-    
+      users.forEach((user) => delete user.users_password);
+
       return responseSuccessMessage('Sorted Users List!', users, 200);
     } catch (err) {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
   }
-  
-  
 
-  async getSearchList(
-    keyword: string,
-  ): Promise<any> {
+  async getSearchList(keyword: string): Promise<any> {
     try {
       // Fetch sorted and filtered users from the database based on the keyword and sorting order
       const users: any[] = await this.userRepository.find({
@@ -223,17 +223,16 @@ export class UserService {
           { users_email: Like(`%${keyword}%`) },
         ],
         order: {
-          registerDate:  'ASC',
+          registerDate: 'ASC',
         },
       });
-  
+
       // Remove sensitive information before sending the response
-      users.forEach(user => delete user.users_password);
-  
+      users.forEach((user) => delete user.users_password);
+
       return responseSuccessMessage('Sorted Users List!', users, 200);
     } catch (err) {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
   }
-  
 }

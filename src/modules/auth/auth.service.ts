@@ -13,7 +13,7 @@ export class AuthService {
     private jwtService: JwtService,
     private userService: UserService,
     private readonly mailServices: MailService,
-  ) { }
+  ) {}
   async createAccessToken(user: User): Promise<TokenPayloadDto> {
     delete user.users_password;
     return new TokenPayloadDto({
@@ -41,7 +41,7 @@ export class AuthService {
   async forgetPsswordApi(userDto: any): Promise<any> {
     try {
       const user: any = await this.userService.findByEmail({
-        users_email: userDto.users_email,
+        users_email: userDto.email ? userDto.email : userDto.users_email,
       });
       if (user == null) {
         throw new HttpException(
@@ -65,14 +65,25 @@ export class AuthService {
  </p>
  <p>
    If you would like to reset your password,
-   <a href='${userDto?.redirectUrl ? userDto?.redirectUrl : 'https://placement-services-venrup.web.app/reset-password'}/${tokenData['accessToken']}' style="background-color:#6082B6; padding: 4px; color: aliceblue; text-decoration: none;">CLICK HERE</a>.
+   <a href='${
+     userDto?.redirectUrl
+       ? userDto?.redirectUrl
+       : 'https://placement-services-venrup.web.app/reset-password'
+   }/${
+          tokenData['accessToken']
+        }' style="background-color:#6082B6; padding: 4px; color: aliceblue; text-decoration: none;">CLICK HERE</a>.
  </p>
  </body>
 </html>`;
         const mailHeading = `Password Reset Request for Placement Services USA, Inc.`;
         const subject = `Password Reset Request for Placement Services USA, Inc.`;
         const mailResponse = await this.mailServices.sendNewMail(
-          user.users_email, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []
+          user.users_email,
+          process.env.COMPANY_EMAIL,
+          subject,
+          mailHeading,
+          mailBody,
+          [],
         );
         return {
           message: 'Email has been send!',
@@ -87,5 +98,4 @@ export class AuthService {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
   }
-
 }

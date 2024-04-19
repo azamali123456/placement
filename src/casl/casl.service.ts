@@ -1,5 +1,3 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 @Injectable()
-export class CaslService {
-  constructor() {}
-}
+export class CaslService {}

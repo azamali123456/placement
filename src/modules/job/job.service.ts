@@ -1,11 +1,11 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { EmployerService } from '../employer/employer.service';
 import { responseSuccessMessage } from '../../constants/responce';
 import { Job } from '../job/job.entity';
-import { LessThanOrEqual, Like, MoreThanOrEqual, Repository, getConnection, getRepository } from 'typeorm';
+import { LessThanOrEqual, Like, MoreThanOrEqual, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ResponseCode } from 'src/exceptions';
-import { excludingWords } from "../../constants/job-search"
+import { excludingWords } from '../../constants/job-search';
 import { JobStatus } from 'src/constants/module-contants';
 
 @Injectable()
@@ -14,7 +14,7 @@ export class JobService {
     @InjectRepository(Job)
     private readonly jobRepository: Repository<Job>,
     private readonly employerService: EmployerService,
-  ) { }
+  ) {}
   // Create new User
   async createJob(jobDto: any): Promise<any> {
     try {
@@ -26,7 +26,10 @@ export class JobService {
         delete jobDto.employerInfo;
         if (jobDto.jobDuration) {
           // const startDate = new Date();
-          const endDate = await this.calculateEndDate(jobDto.startDate, jobDto.jobDuration);
+          const endDate = await this.calculateEndDate(
+            jobDto.startDate,
+            jobDto.jobDuration,
+          );
           jobDto.endDate = endDate;
         }
         const data: any = await this.jobRepository.create(jobDto);
@@ -41,7 +44,6 @@ export class JobService {
   // Job list
   async getJobsList(): Promise<any> {
     try {
-
       const data: any = await this.jobRepository
         .createQueryBuilder('job')
         .leftJoinAndSelect('job.employerInfo', 'employerInfo')
@@ -85,7 +87,10 @@ export class JobService {
 
       for (let x = 0; x < data.length; x++) {
         if (data[x].payments.length > 0 && data[x].status === 'SAVED') {
-          const updatedJob = await this.jobRepository.update({ id: data[x].id }, { status: JobStatus.SUBMITTED });
+          await this.jobRepository.update(
+            { id: data[x].id },
+            { status: JobStatus.SUBMITTED },
+          );
           data[x].status = JobStatus.SUBMITTED;
         }
       }
@@ -95,12 +100,10 @@ export class JobService {
     }
   }
 
-
-
   // Delete A Job
   async deleteJob(id: any): Promise<any> {
     try {
-      const data = await this.jobRepository.delete({ id })
+      const data = await this.jobRepository.delete({ id });
       if (data.affected === 0) {
         throw new HttpException('Job not found', HttpStatus.NOT_FOUND);
       }
@@ -161,11 +164,10 @@ export class JobService {
   //   }
   // }
 
-
   // Get My submitted Jobs list
   async GetMySubmittedJobs(): Promise<any> {
     try {
-      const status = 'SUBMITTED'
+      const status = 'SUBMITTED';
       const data: any = await this.jobRepository
         .createQueryBuilder('job')
         .leftJoinAndSelect('job.employerInfo', 'employerInfo')
@@ -228,7 +230,6 @@ export class JobService {
   // Get My Jobs List by Status (SAVED,SUBMITTED,PUBLISHED)
   async GetMySavedJobs(userId: any, status: any): Promise<any> {
     try {
-      const addToCard = false
       const data: any = await this.jobRepository
         .createQueryBuilder('job')
         .leftJoinAndSelect('job.employerInfo', 'employerInfo')
@@ -279,7 +280,10 @@ export class JobService {
 
       for (let x = 0; x < data.length; x++) {
         if (data[x].payments.length > 0 && data[x].status === 'ADDTOCART') {
-          const updatedJob = await this.jobRepository.update({ id: data[x].id }, { status: JobStatus.SUBMITTED });
+          await this.jobRepository.update(
+            { id: data[x].id },
+            { status: JobStatus.SUBMITTED },
+          );
           data[x].status = JobStatus.SUBMITTED;
         }
       }
@@ -302,9 +306,13 @@ export class JobService {
       throw new HttpException('malicious search', ResponseCode.BAD_REQUEST);
     }
     try {
-      let newText: any = ''
+      let newText: any = '';
       if (keyword) {
-        newText = keyword.toLowerCase().split(' ').filter(word => !excludingWords.includes(word)).join(' ');
+        newText = keyword
+          .toLowerCase()
+          .split(' ')
+          .filter((word) => !excludingWords.includes(word))
+          .join(' ');
       }
       let where1 = [];
       if (worksiteCity && keyword === undefined) {
@@ -316,40 +324,42 @@ export class JobService {
             },
           },
         ];
-      }
-      else if (newText && worksiteCity === undefined) {
-        if (newText === '') {
-          where1 = []
-        } else {
-          where1 = [
-            {
-              jobTitle: Like(`%${newText}%`), status: JobStatus.SUBMITTED,
-            },
-            {
-              requiredSkills: Like(`%${newText}%`), status: JobStatus.SUBMITTED
-            },
-            {
-              employerInfo: {
-                companyName: Like(`%${newText}%`)
-              },
-            },
-          ];
-        }
-      }
-      else if ((newText || newText === '') && worksiteCity) {
+      } else if (newText && worksiteCity === undefined) {
         if (newText === '') {
           where1 = [];
         } else {
           where1 = [
             {
-              jobTitle: Like(`%${newText}%`), status: JobStatus.SUBMITTED,
+              jobTitle: Like(`%${newText}%`),
+              status: JobStatus.SUBMITTED,
+            },
+            {
+              requiredSkills: Like(`%${newText}%`),
+              status: JobStatus.SUBMITTED,
+            },
+            {
+              employerInfo: {
+                companyName: Like(`%${newText}%`),
+              },
+            },
+          ];
+        }
+      } else if ((newText || newText === '') && worksiteCity) {
+        if (newText === '') {
+          where1 = [];
+        } else {
+          where1 = [
+            {
+              jobTitle: Like(`%${newText}%`),
+              status: JobStatus.SUBMITTED,
               employerInfo: {
                 worksiteCity: Like(`%${worksiteCity}%`),
                 state: Like(`%${state}%`),
               },
             },
             {
-              requiredSkills: Like(`%${newText}%`), status: JobStatus.SUBMITTED,
+              requiredSkills: Like(`%${newText}%`),
+              status: JobStatus.SUBMITTED,
               employerInfo: {
                 worksiteCity: Like(`%${worksiteCity}%`),
                 state: Like(`%${state}%`),
@@ -369,7 +379,7 @@ export class JobService {
         throw new HttpException('Invalid keyword', ResponseCode.BAD_REQUEST);
       }
 
-      let result = await this.jobRepository.find({
+      const result = await this.jobRepository.find({
         where: where1,
         relations: ['employerInfo'],
         select: [
@@ -397,8 +407,6 @@ export class JobService {
     }
   }
 
-
-
   // Search submitted Jobs
   async SearchSubmittedJob(
     keyword: string,
@@ -406,11 +414,14 @@ export class JobService {
     endDate: string,
   ): Promise<any> {
     if (!keyword && !startDate && !endDate) {
-      throw new HttpException('Either keyword or date range must be provided', ResponseCode.BAD_REQUEST);
+      throw new HttpException(
+        'Either keyword or date range must be provided',
+        ResponseCode.BAD_REQUEST,
+      );
     }
 
     try {
-      let where1: any[] = [];
+      const where1: any[] = [];
 
       if (keyword) {
         where1.push(
@@ -425,11 +436,9 @@ export class JobService {
           {
             jobNumber: Like(`%${keyword}%`),
             status: JobStatus.SUBMITTED,
-          }
+          },
         );
       }
-
-
 
       if (startDate && endDate) {
         const startDateObj = new Date(startDate);
@@ -456,12 +465,14 @@ export class JobService {
 
       // Handle the case where both startDate and endDate are provided
 
-
       if (where1.length === 0) {
-        throw new HttpException('Invalid keyword or date range', ResponseCode.BAD_REQUEST);
+        throw new HttpException(
+          'Invalid keyword or date range',
+          ResponseCode.BAD_REQUEST,
+        );
       }
 
-      let result = await this.jobRepository.find({
+      const result = await this.jobRepository.find({
         where: where1,
         relations: ['employerInfo', 'payments'],
         // .leftJoinAndSelect('job.employerInfo', 'employerInfo')
@@ -499,78 +510,78 @@ export class JobService {
   async getSortedList(
     sortBy: string,
     sortOrder: any,
-    keyword: string
-): Promise<any> {
+    keyword: string,
+  ): Promise<any> {
     try {
-        let orderOptions: { [key: string]: 'ASC' | 'DESC' } = {};
+      let orderOptions: { [key: string]: 'ASC' | 'DESC' } = {};
 
-        // Define the default sorting order for each field
-        const defaultSortOrder: { [key: string]: 'ASC' | 'DESC' } = {
-            startDate: 'ASC',
-            endDate: 'ASC',
-            storeDate: 'ASC',
-            jobTitle: 'ASC',
-            jobNumber:'ASC',
-            agent: 'ASC',
-        };
+      // Define the default sorting order for each field
+      const defaultSortOrder: { [key: string]: 'ASC' | 'DESC' } = {
+        startDate: 'ASC',
+        endDate: 'ASC',
+        storeDate: 'ASC',
+        jobTitle: 'ASC',
+        jobNumber: 'ASC',
+        agent: 'ASC',
+      };
 
-        // Toggle sorting order if the same field is clicked again
-        if (sortBy && sortOrder && defaultSortOrder[sortBy]) {
-          if(sortBy == 'agent'){
-            orderOptions[`agentData.${sortBy}`] = sortOrder;
-          }else{
-            orderOptions[sortBy] = sortOrder;
-
-          }
+      // Toggle sorting order if the same field is clicked again
+      if (sortBy && sortOrder && defaultSortOrder[sortBy]) {
+        if (sortBy == 'agent') {
+          orderOptions[`agentData.${sortBy}`] = sortOrder;
         } else {
-            // Use the default sorting order for the selected field
-            orderOptions = { [sortBy]: defaultSortOrder[sortBy] };
+          orderOptions[sortBy] = sortOrder;
         }
+      } else {
+        // Use the default sorting order for the selected field
+        orderOptions = { [sortBy]: defaultSortOrder[sortBy] };
+      }
 
-        // Define search criteria based on the keyword
-        let searchCriteria = {};
+      // Define search criteria based on the keyword
+      let searchCriteria = {};
 
-        if (keyword) {
-            searchCriteria = {
-                where: [
-                    { jobTitle: Like(`%${keyword}%`) },
-                    { jobNumber: Like(`%${keyword}%`) }
+      if (keyword) {
+        searchCriteria = {
+          where: [
+            { jobTitle: Like(`%${keyword}%`) },
+            { jobNumber: Like(`%${keyword}%`) },
+          ],
+        };
+      }
 
-                ],
-            };
-        }
+      // Fetch sorted jobs from the database based on the generated order options and search criteria
+      const jobs: any[] = await this.jobRepository.find({
+        ...searchCriteria,
+        order: orderOptions,
+      });
 
-        // Fetch sorted jobs from the database based on the generated order options and search criteria
-        const jobs: any[] = await this.jobRepository.find({
-            ...searchCriteria,
-            order: orderOptions,
-        });
+      // Remove sensitive information before sending the response
 
-        // Remove sensitive information before sending the response
-
-        return responseSuccessMessage('Sorted Jobs List!', jobs, 200);
+      return responseSuccessMessage('Sorted Jobs List!', jobs, 200);
     } catch (err) {
-        throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
+      throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
-}
-
+  }
 
   // Jobs Varification
   async JobVarifivcation(id: any, jobDto: any): Promise<any> {
     try {
-      let job: any = await this.FindOne(Number(id))
+      const job: any = await this.FindOne(Number(id));
       if (job.data.length === 0) {
         throw new HttpException('No Job found!', ResponseCode.BAD_REQUEST);
       } else {
-        const Job = await this.jobRepository.update({ id: id }, jobDto)
-        let updatedJob: any = await this.FindOne(id)
-        return responseSuccessMessage('Job Varified Successfull', updatedJob.data[0], 200);
+        await this.jobRepository.update({ id: id }, jobDto);
+        const updatedJob: any = await this.FindOne(id);
+        return responseSuccessMessage(
+          'Job Varified Successfull',
+          updatedJob.data[0],
+          200,
+        );
       }
     } catch (err) {
       throw new HttpException(err.message, err.status);
     }
   }
-
 
   // Find A Job
   async FindOne(id: number): Promise<any> {
@@ -580,7 +591,7 @@ export class JobService {
           id: id,
         },
       ];
-      let result = await this.jobRepository.find({
+      const result = await this.jobRepository.find({
         where: where,
         relations: ['employerInfo'],
         select: [
@@ -618,54 +629,78 @@ export class JobService {
   // Find And Update
   async findOneAndUpdate(id: number, jobDto: any, userId: any): Promise<any> {
     try {
-      let job: any = await this.FindOne(Number(id))
+      const job: any = await this.FindOne(Number(id));
       if (job.data.length === 0) {
         throw new HttpException('No Job found!', ResponseCode.BAD_REQUEST);
       } else {
         if (userId === job.data[0].userId) {
-          const employerInfo: any = jobDto.employerInfo
-          delete jobDto.employerInfo
+          const employerInfo: any = jobDto.employerInfo;
+          delete jobDto.employerInfo;
           // If startDate and jobDuration comes then both will updated if else....
           if (jobDto.jobDuration && jobDto.startDate) {
-            const endDate = await this.calculateEndDate(jobDto.startDate, jobDto.jobDuration);
+            const endDate = await this.calculateEndDate(
+              jobDto.startDate,
+              jobDto.jobDuration,
+            );
             jobDto.endDate = endDate;
           } else if (jobDto.startDate) {
-            const endDate = await this.calculateEndDate(jobDto.startDate, job.data[0].jobDuration);
+            const endDate = await this.calculateEndDate(
+              jobDto.startDate,
+              job.data[0].jobDuration,
+            );
             jobDto.endDate = endDate;
           } else if (jobDto.jobDuration) {
-            const endDate = await this.calculateEndDate(job.data[0].startDate, jobDto.jobDuration);
+            const endDate = await this.calculateEndDate(
+              job.data[0].startDate,
+              jobDto.jobDuration,
+            );
             jobDto.endDate = endDate;
           }
 
-          const updatedJob = await this.jobRepository.update({ id: id }, jobDto)
+          const updatedJob = await this.jobRepository.update(
+            { id: id },
+            jobDto,
+          );
           // If You want to update EmployerInfo.
           if (updatedJob.affected > 0 && employerInfo) {
-            const updatedEmployer = await this.employerService.updateEmployerInfo(job.data[0].employerInfo.id, employerInfo)
+            await this.employerService.updateEmployerInfo(
+              job.data[0].employerInfo.id,
+              employerInfo,
+            );
           }
         } else {
-          throw new HttpException(`You have no access to edit this Job!`, ResponseCode.BAD_REQUEST);
+          throw new HttpException(
+            `You have no access to edit this Job!`,
+            ResponseCode.BAD_REQUEST,
+          );
         }
-        let updatedJob: any = await this.FindOne(id)
-        return responseSuccessMessage('Job Updated Successfully', updatedJob.data[0], 200);
+        const updatedJob: any = await this.FindOne(id);
+        return responseSuccessMessage(
+          'Job Updated Successfully',
+          updatedJob.data[0],
+          200,
+        );
       }
     } catch (err) {
       throw new HttpException(err.message, err.status);
     }
   }
 
-
-
   // Find And Update Job Status
-  async updateJobStatus(id: number, jobDto: any, userId: any): Promise<any> {
+  async updateJobStatus(id: number, jobDto: any): Promise<any> {
     try {
       // Find the job by its ID
       const job: any = await this.FindOne(Number(id));
       if (job && job.data) {
         const data = job.data[0];
-        data.status = jobDto.status
+        data.status = jobDto.status;
         await this.jobRepository.update({ id: Number(id) }, data);
         const updatedJob: any = await this.FindOne(Number(id));
-        return responseSuccessMessage('Job Updated Successfully', updatedJob.data, 200);
+        return responseSuccessMessage(
+          'Job Updated Successfully',
+          updatedJob.data,
+          200,
+        );
       } else {
         throw new HttpException('No Job Exist!', ResponseCode.NOT_FOUND);
       }
@@ -674,28 +709,24 @@ export class JobService {
     }
   }
 
-
-
-  // Update All Jobs status 
-  async updateAllJobsStstus(jobList: any, userId: any): Promise<any> {
+  // Update All Jobs status
+  async updateAllJobsStstus(jobList: any): Promise<any> {
     try {
       for (let x = 0; x < jobList.length; x++) {
         const job: any = await this.FindOne(Number(jobList[x].id));
         if (job && job.data) {
           const data = job.data[0];
-          data.status = 'ADDTOCART'
+          data.status = 'ADDTOCART';
           await this.jobRepository.update({ id: Number(jobList[x].id) }, data);
         } else {
           throw new HttpException('No Job Exist!', ResponseCode.NOT_FOUND);
         }
       }
       return responseSuccessMessage('Jobs are Added to Cart', [], 200);
-
     } catch (err) {
       throw new HttpException(err.message, err.status);
     }
   }
-
 
   // Find And Update
   // async GetMyUncheckoutJobs(userId: any): Promise<any> {
@@ -763,8 +794,6 @@ export class JobService {
   //     throw new HttpException(err.message, err.status);
   //   }
   // }
-
-
 
   // Calculate End Date
   async calculateEndDate(startDate: any, jobDuration: number): Promise<Date> {

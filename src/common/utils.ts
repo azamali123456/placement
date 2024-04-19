@@ -1,4 +1,4 @@
-const passwordHash = require('password-hash');
+import * as passwordHash from 'password-hash';
 
 import type { Optional } from '../types';
 

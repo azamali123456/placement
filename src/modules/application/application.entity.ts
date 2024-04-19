@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 import { IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 @Entity()
@@ -15,24 +8,23 @@ export class Application extends BaseEntity {
 
   @Column()
   @ApiProperty()
-  jobNumber!: number
+  jobNumber!: number;
 
   @Column()
   @ApiProperty()
-  companyName!: string
+  companyName!: string;
 
   @Column()
   @ApiProperty()
-  jobTitle!: number
+  jobTitle!: number;
 
   @Column()
   @ApiProperty()
-  jobAddress!: number
+  jobAddress!: number;
 
-  
   @Column()
   @ApiProperty()
-  userId!: number
+  userId!: number;
 
   @Column()
   @ApiProperty()
@@ -50,7 +42,6 @@ export class Application extends BaseEntity {
   @ApiProperty()
   phone!: number;
 
-  
   @Column()
   @ApiProperty()
   city!: string;
@@ -66,25 +57,23 @@ export class Application extends BaseEntity {
   @Column()
   @IsBoolean()
   @ApiProperty()
-  willingToRelocate !: boolean
+  willingToRelocate!: boolean;
 
   @Column()
   @IsBoolean()
   @ApiProperty()
-  legallyFullTimeInUsa!: boolean
+  legallyFullTimeInUsa!: boolean;
 
   @Column()
   // @IsBoolean()
   @ApiProperty()
-  eligibilityFullTimeInUsa!: string
+  eligibilityFullTimeInUsa!: string;
 
   @Column()
   @ApiProperty()
-  coverLater!: string
+  coverLater!: string;
 
   @Column()
   @ApiProperty()
-  cv!: string
-
-
+  cv!: string;
 }

@@ -1,12 +1,6 @@
 import { IsInt } from 'class-validator';
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  OneToMany,
-} from 'typeorm';
-import { Job } from '../job/job.entity';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+
 import { ApiProperty } from '@nestjs/swagger';
 @Entity()
 export class EmployerInfo {

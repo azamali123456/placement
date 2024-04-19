@@ -1,10 +1,5 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-} from 'typeorm';
-import {  Length } from 'class-validator';
+import { Entity, Column, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
+import { Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 @Entity()
 export class Contactus extends BaseEntity {
@@ -13,27 +8,22 @@ export class Contactus extends BaseEntity {
 
   @Column()
   @ApiProperty()
-  firstName!: string
+  firstName!: string;
 
   @Column()
   @ApiProperty()
-  lastName!: string
+  lastName!: string;
 
   @Column()
   @ApiProperty()
-  companyName!: string
+  companyName!: string;
 
   @Column()
   @ApiProperty()
-  email!: string
+  email!: string;
 
-  
   @Column()
   @ApiProperty()
   @Length(24)
-  message!: string
-
-  
-
-
+  message!: string;
 }
