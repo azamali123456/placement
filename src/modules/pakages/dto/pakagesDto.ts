@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 export class PakagesPayloadDto {
-
   @ApiProperty()
   title!: string;
 
@@ -9,6 +8,4 @@ export class PakagesPayloadDto {
 
   @ApiProperty()
   discription!: string;
-
-
 }

@@ -6,17 +6,16 @@ import { Repository } from 'typeorm';
 import { Payment } from './payment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JobService } from '../job/job.service';
-import { MailService } from '../mail/mail.service'
-
+import { MailService } from '../mail/mail.service';
 @Injectable()
 export class PaymentService {
   private stripe: Stripe;
   @InjectRepository(Payment)
   private readonly paymentRepository: Repository<Payment>;
 
-  constructor(private readonly jobService: JobService,
-    private readonly mailService: MailService
-
+  constructor(
+    private readonly jobService: JobService,
+    private readonly mailService: MailService,
   ) {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2022-11-15',
@@ -26,7 +25,7 @@ export class PaymentService {
   async savedPayment(paymentDto: any): Promise<any> {
     try {
       const { name, email } = paymentDto.data.object.customer_details.name;
-      const stripeUser: any = await this.stripe.customers.create({
+      await this.stripe.customers.create({
         name,
         email,
       });
@@ -69,7 +68,7 @@ export class PaymentService {
 
         // const stripe = require('stripe')('sk_test_51NFKZLAgDjJFNJDFCKn6K3RAcVhlQ4xnm6TaKI6ddKkHdfxT3928rcB8baVoB3XCFoscIrllGpeuPjRmwWAVt6qJ00vrjPBTnF');
         // const paymentIntentId = paymentDto.data?.object?.payment_intent
-        let receiptUrl = '';
+        const receiptUrl = '';
         // if (paymentIntentId) {
         //     const paymentIntent:any = await this.stripe.paymentIntents.retrieve(paymentIntentId);
         //     if (paymentIntent.status === 'succeeded') {
@@ -85,7 +84,6 @@ export class PaymentService {
         //     }
         // }
 
-
         // if (paymentIntentId) {
         //   const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
         //    receiptUrl = paymentIntent.charges.data[0].receipt_url;
@@ -97,8 +95,8 @@ export class PaymentService {
         // if (jobsMetadata[0]?.accountHolder) {
         //   const mailSent = await this.mailService.sendNewMail(jobsMetadata[0]?.accountHolder, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
         // }
-        const date = new Date(paymentDto.created * 1000)
-        const mailBody = `<html>
+        const date = new Date(paymentDto.created * 1000);
+        `<html>
         <head>
           <style>
             /* Optional: Add styling for the image */
@@ -124,7 +122,11 @@ export class PaymentService {
           </div>
           <div class="invoice-container">
             <h2>Invoice <small>#${paymentDto.id}</small></h2>
-            <p>Payment Date: ${date.toUTCString().split(' ').slice(0, 5).join(' ')}</p>
+            <p>Payment Date: ${date
+              .toUTCString()
+              .split(' ')
+              .slice(0, 5)
+              .join(' ')}</p>
             <p>Amount Paid: $${paymentDto.data.object.amount_total / 100}</p>
             <div>
             <a href="${receiptUrl}" target="_blank">View invoice and payment details ></a>
@@ -132,11 +134,10 @@ export class PaymentService {
           </div>   
         </body>
       </html>`;
-        const mailHeading = `Placement Services USA, Inc.`;
-        const subject = `Placement Services USA, Inc.`;
+
         // const mailSent = await this.mailService.sendNewMail(paymentObj.customer.email, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
         const checkOut: any = await this.paymentRepository.create(paymentObj);
-        const checkOutSaved: any = await this.paymentRepository.save(checkOut);
+        await this.paymentRepository.save(checkOut);
       }
 
       return paymentDto;
@@ -151,7 +152,7 @@ export class PaymentService {
         currency: object.currency || 'usd',
         product_data: {
           name: object.name,
-          description:   object.description.replace(/<\/?p>/g, '') || '',
+          description: object.description.replace(/<\/?p>/g, '') || '',
         },
         unit_amount: parseInt(object.amount) * 100, // amount in cents
       },
@@ -171,16 +172,13 @@ export class PaymentService {
         // zipCode: `${object.billingAddress?.zipCode}`,
         type: `${object.billingMethod.type}`,
         url: `${object?.success_url}`,
-        accountHolder: `${object?.accountHolder}`
+        accountHolder: `${object?.accountHolder}`,
       })),
     );
     const session = await this.stripe.checkout.sessions.create({
       line_items: lineItems,
       metadata: { Jobs: matadata },
-      payment_method_types: [
-        'card',
-        'us_bank_account',
-      ],
+      payment_method_types: ['card', 'us_bank_account'],
       mode: 'payment',
       success_url: `${object[0]?.success_url}`,
       cancel_url: `https://placement-services-venrup.web.app/checkout`,
@@ -191,42 +189,58 @@ export class PaymentService {
   // Setup Charge Now
   async createCharge(object: any): Promise<any> {
     try {
-      const stripe = require('stripe')('sk_test_51NFKZLAgDjJFNJDFCKn6K3RAcVhlQ4xnm6TaKI6ddKkHdfxT3928rcB8baVoB3XCFoscIrllGpeuPjRmwWAVt6qJ00vrjPBTnF');
-      let amount: any = 0
-      let description: any = ''
-      let token: any
-      let currency: any = ''
+      const stripe = new Stripe(
+        'sk_test_51NFKZLAgDjJFNJDFCKn6K3RAcVhlQ4xnm6TaKI6ddKkHdfxT3928rcB8baVoB3XCFoscIrllGpeuPjRmwWAVt6qJ00vrjPBTnF',
+        {apiVersion:'2022-11-15'},
+      );
+      let amount: any = 0;
+      let description: any = '';
+      let token: any;
+      let currency: any = '';
       for (let x = 0; x < object.length; x++) {
-        amount = object[x].amount + amount
-        description = `${object[x].name}- ${description}`
-        token = object[x].token
-        currency = 'usd'
+        amount = object[x].amount + amount;
+        description = `${object[x].name}- ${description}`;
+        token = object[x].token;
+        currency = 'usd';
       }
-      const charge = await stripe.charges.create({
+      const charge:Stripe.Charge = await stripe.charges.create({
         amount,
         currency,
         description,
         source: token,
       });
-      let email = ''
+      let email = '';
       for (let x = 0; x < object.length; x++) {
-        const metadata = { url: object[x]?.success_url, city: object[x].billingAddress.city, type: object[x].billingMethod.type, email: object[x].billingMethod.email, jobId: object[x].jobId, state: object[x].billingAddress.state, userId: object[x].userId, address: "", company: object[x].billingAddress.company, zipCode: object[x].billingAddress.zipCode, lastName: object[x].billingAddress.lastName, firstName: object[x].billingAddress.firstName }
-        email = metadata.email
+        const metadata = {
+          url: object[x]?.success_url,
+          city: object[x].billingAddress.city,
+          type: object[x].billingMethod.type,
+          email: object[x].billingMethod.email,
+          jobId: object[x].jobId,
+          state: object[x].billingAddress.state,
+          userId: object[x].userId,
+          address: '',
+          company: object[x].billingAddress.company,
+          zipCode: object[x].billingAddress.zipCode,
+          lastName: object[x].billingAddress.lastName,
+          firstName: object[x].billingAddress.firstName,
+        };
+        email = metadata.email;
         const paymentObj = {
           varify: true,
           refunded: charge.refunded,
           receipt_email: object[0].billingMethod.email,
-          payment_method_details: charge.payment_method_details,
+          payment_method_details:  typeof charge.payment_method_details=='object'?charge.payment_method_details:{},
           payment_method: charge.payment_method,
-          payment_intent: charge.payment_intent,
+          payment_intent: typeof charge.payment_intent=='string'?charge.payment_intent:charge.payment_intent.id,
           paid: charge.paid,
-          invoice: charge.invoice,
-          customer: charge.customer,
+          invoice: typeof charge.invoice=='string'?charge.invoice:charge.invoice.id,
+          customer: typeof charge.customer=='object'? charge.customer:{},
           currency: charge.currency,
           created: charge.created,
           receipt_url: charge.receipt_url,
           billing_details: charge.billing_details,
-          balance_transaction: charge.balance_transaction,
+          balance_transaction: typeof charge.balance_transaction=='string'? charge.balance_transaction:charge.balance_transaction.id,
           amount_refunded: charge.amount_refunded,
           amount_captured: charge.amount_captured,
           amount: charge.amount,
@@ -248,9 +262,9 @@ export class PaymentService {
           },
         };
         const checkOut: any = await this.paymentRepository.create(paymentObj);
-        const checkOutSaved: any = await this.paymentRepository.save(checkOut);
+        await this.paymentRepository.save(checkOut);
       }
-      const date = new Date(charge.created * 1000)
+      const date = new Date(charge.created * 1000);
       if (charge && charge.receipt_url) {
         const mailBody = `<html>
           <head>
@@ -278,10 +292,16 @@ export class PaymentService {
             </div>
             <div class="invoice-container">
               <h2>Invoice <small>#${charge.id}</small></h2>
-              <p>Payment Date: ${date.toUTCString().split(' ').slice(0, 5).join(' ')} </p>
+              <p>Payment Date: ${date
+                .toUTCString()
+                .split(' ')
+                .slice(0, 5)
+                .join(' ')} </p>
               <p>Amount Paid: $${charge.amount / 100}</p>
               <div>
-              <a href="${charge.receipt_url}" target="_blank">View invoice and payment details ></a>
+              <a href="${
+                charge.receipt_url
+              }" target="_blank">View invoice and payment details ></a>
             </div> 
             </div>   
           </body>
@@ -293,9 +313,20 @@ export class PaymentService {
         // if(object[0].accountHolder){
         //   const mailSent = await this.mailService.sendNewMail(object[0].accountHolder, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
         // }
-        const mailSent = await this.mailService.sendNewMail(email, process.env.COMPANY_EMAIL, subject, mailHeading, mailBody, []);
+        await this.mailService.sendNewMail(
+          email,
+          process.env.COMPANY_EMAIL,
+          subject,
+          mailHeading,
+          mailBody,
+          [],
+        );
       }
-      return responseSuccessMessage('Checkout has been Done Successfully!', [], 200);
+      return responseSuccessMessage(
+        'Checkout has been Done Successfully!',
+        [],
+        200,
+      );
     } catch (err: any) {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }

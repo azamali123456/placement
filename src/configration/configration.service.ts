@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 @Injectable()
 export class ConfigrationService {
-
   get authConfig() {
     return {
       privateKey: process.env.JWT_PRIVATE_KEY,

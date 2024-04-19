@@ -22,17 +22,17 @@ async function bootstrap() {
   const configService = app.select(ConfigrationModule).get(ConfigrationService);
 
   // if (configService.kafkaEnabled) {
-    // app.connectMicroservice<MicroserviceOptions>({
-    //   transport: Transport.KAFKA,
-    //   options: {
-    //     client: {
-    //       brokers: ['localhost:29092'],
-    //     },
-    //     consumer: {
-    //       groupId: 'log-consumer',
-    //     },
-    //   },
-    // });
+  // app.connectMicroservice<MicroserviceOptions>({
+  //   transport: Transport.KAFKA,
+  //   options: {
+  //     client: {
+  //       brokers: ['localhost:29092'],
+  //     },
+  //     consumer: {
+  //       groupId: 'log-consumer',
+  //     },
+  //   },
+  // });
 
   //   await app.startAllMicroservices();
   // }

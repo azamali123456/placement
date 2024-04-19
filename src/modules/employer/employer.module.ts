@@ -12,10 +12,9 @@ import { JwtModule } from '@nestjs/jwt';
       secret: 'your_secret_key', // Provide a valid secret key
       signOptions: { expiresIn: '1h' },
     }),
-  
   ],
-controllers: [EmployerController],
-providers: [EmployerService ],
-exports: [EmployerService],
+  controllers: [EmployerController],
+  providers: [EmployerService],
+  exports: [EmployerService],
 })
 export class EmployerModule {}

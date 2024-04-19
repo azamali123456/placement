@@ -4,7 +4,7 @@ import type {
   NestInterceptor,
 } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
-import {ContextProvider} from '../providers/context.provider';
+import { ContextProvider } from '../providers/context.provider';
 @Injectable()
 export class AuthUserInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler) {

@@ -1,10 +1,9 @@
 // src/module/user/dto/create-user.dto.ts
 
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, MinLength, } from 'class-validator';
+import { IsEmail, IsString, MinLength } from 'class-validator';
 
 export class CreateUserLoginDto {
-
   @ApiProperty({ default: 'example@gmail.com' }) // Specify default value here
   @IsString()
   @IsEmail()
@@ -14,7 +13,4 @@ export class CreateUserLoginDto {
   @IsString()
   @MinLength(5)
   users_password: string;
-
-  
-
 }

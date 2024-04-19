@@ -8,7 +8,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class ServicsService {
   @InjectRepository(Pakages)
   private readonly pakagesRepository: Repository<Pakages>;
-  constructor() { }
   // Saved A Pakage
   async savedPakages(srvicsDto: any): Promise<any> {
     try {
@@ -29,5 +28,3 @@ export class ServicsService {
     }
   }
 }
-
-

@@ -7,12 +7,11 @@ import {
   JoinColumn,
   BeforeInsert,
   OneToMany,
-  CreateDateColumn,
 } from 'typeorm';
 import { JobStatus } from '../../constants/module-contants';
 import { IsInt, Min, Max, IsBoolean, IsOptional } from 'class-validator';
 import { EmployerInfo } from '../employer/employer.entity';
-import { Payment } from '../payment/payment.entity'
+import { Payment } from '../payment/payment.entity';
 import { Pakages } from '../pakages/pakages.entity';
 import { ApiProperty } from '@nestjs/swagger';
 @Entity()
@@ -49,19 +48,19 @@ export class Job extends BaseEntity {
   telecommuting!: boolean;
 
   @ApiProperty()
-  @Column("text")
+  @Column('text')
   discription!: string;
 
   @ApiProperty()
-  @Column("text")
+  @Column('text')
   educationAndExperience!: string;
 
   @ApiProperty()
-  @Column("text")
+  @Column('text')
   specialSkills!: string;
 
   @ApiProperty()
-  @Column("text")
+  @Column('text')
   travelRequirements!: string;
 
   @ApiProperty()
@@ -74,7 +73,7 @@ export class Job extends BaseEntity {
   jobType!: string;
 
   @ApiProperty()
-  @Column({ default: "0" })
+  @Column({ default: '0' })
   salary!: string;
 
   @ApiProperty()
@@ -98,15 +97,6 @@ export class Job extends BaseEntity {
   })
   endDate!: Date;
 
-
-  @ApiProperty()
-  @Column({
-    type: 'date',
-    default: null, // Set the default to null
-    nullable: true, // Allow the column to be nullable
-  })
-  submittedDate: Date;
-
   @ApiProperty()
   @Column()
   employerId!: number;
@@ -124,7 +114,7 @@ export class Job extends BaseEntity {
   status!: JobStatus;
 
   @ApiProperty()
-  @Column("text")
+  @Column('text')
   specialInstructions!: string;
 
   @ApiProperty()
@@ -168,8 +158,6 @@ export class Job extends BaseEntity {
   @JoinColumn({ name: 'employerId' })
   employerInfo!: EmployerInfo;
 
-
-
   @OneToMany(() => Payment, (payment) => payment.job)
   payments!: Payment[];
 
@@ -182,39 +170,43 @@ export class Job extends BaseEntity {
   @Column({ type: 'json', nullable: false })
   agentData: object;
 
-
   @ApiProperty()
-  @Column()
+  @Column({ nullable: false })
   @IsOptional()
   invoiceCopyTo!: string;
 
-  
   @ApiProperty()
-  @Column()
+  @Column({ nullable: false })
   @IsOptional()
   PSUSA_status!: string;
 
-
   @ApiProperty()
-  @Column()
+  @Column({ nullable: false })
   @IsBoolean()
   @IsOptional()
   resumeTo_PSUSA!: boolean;
-
 
   @ApiProperty()
   @IsOptional()
   @Column({
     type: 'date',
+    default: null, // Set the default to null
     nullable: false, // Allow the column to be nullable
   })
   storeDate: Date;
-  
 
+  @ApiProperty()
+  @Column({ nullable: false })
+  @IsOptional()
+  submitResume!: string;
+  
   @ApiProperty()
   @Column({ type: 'json', nullable: false })
   diaplayItem: any;
 
+  @ApiProperty()
+  @Column({ type: 'datetime' }) // Specify the column type as datetime
+  submittedDate: Date;
 
   @BeforeInsert()
   setDefaultSubmittedDate() {

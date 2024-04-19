@@ -6,7 +6,6 @@ import {
   HttpStatus,
   Patch,
   Post,
-  Version,
 } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Action } from '../../casl/userRoles';
@@ -18,8 +17,7 @@ import { TokenPayloadDto } from './dto/TokenPayloadDto';
 import { CreateUserLoginDto } from '../user/dto/create-user-login.dto';
 import { UserForgetPasswordDto } from '../user/dto/user-forget-email.dto';
 import { UserNewPasswordDto } from '../user/dto/user-forget-password.dto';
-import { RevisedPasswordDto} from  '../user/dto/account-revised-password.dto'
-
+import { RevisedPasswordDto } from '../user/dto/account-revised-password.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -74,8 +72,8 @@ export class AuthController {
   @Auth(Action.Read, 'User')
   @ApiBody({ required: true, type: User })
   @ApiOkResponse({ type: User, description: 'Edit User/Account info' })
-  editUserAccount(@AuthUser() user: User , @Body() body: any,) {
-    return this.userService.updateUser(user.id,body);
+  editUserAccount(@AuthUser() user: User, @Body() body: any) {
+    return this.userService.updateUser(user.id, body);
   }
 
   // Edit Your Account Password Or revised Password
@@ -83,9 +81,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Auth(Action.Read, 'User')
   @ApiBody({ required: true, type: RevisedPasswordDto })
-  @ApiOkResponse({ type: RevisedPasswordDto, description: 'Edit Account Password' })
-  revisedPassword(@AuthUser() user: User , @Body() body: any,) {
-    return this.userService.rewisedPassword(user.id,body);
+  @ApiOkResponse({
+    type: RevisedPasswordDto,
+    description: 'Edit Account Password',
+  })
+  revisedPassword(@AuthUser() user: User, @Body() body: any) {
+    return this.userService.rewisedPassword(user.id, body);
   }
   // @Version('1')
   @Get('me')
@@ -95,7 +96,4 @@ export class AuthController {
   getCurrentUser(@AuthUser() user: User): User {
     return user;
   }
-
-
-  
 }

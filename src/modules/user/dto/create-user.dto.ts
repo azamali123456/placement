@@ -1,11 +1,9 @@
 // src/module/user/dto/create-user.dto.ts
 
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNumber, IsOptional, IsPhoneNumber, IsString, MinLength, } from 'class-validator';
-import { Unique } from 'typeorm';
+import { IsEmail, IsNumber, IsString, MinLength } from 'class-validator';
 
 export class CreateUserDto {
-
   @ApiProperty({ default: 'example@gmail.com' }) // Specify default value here
   @IsString()
   @IsEmail()
@@ -20,17 +18,14 @@ export class CreateUserDto {
   @IsString()
   firstName: string;
 
-
   @ApiProperty({ default: 'Peter' })
   @IsString()
   lastName: string;
-
 
   @ApiProperty({ default: 'Peter Work Space' })
   @IsString()
   companyName: string;
 
-  
   @ApiProperty({ default: '03326754886' })
   @IsString()
   phone: string;
@@ -45,7 +40,5 @@ export class CreateUserDto {
 
   @ApiProperty({ default: '15445' })
   @IsNumber()
-  zipCode: Number;
-
-
+  zipCode: number;
 }

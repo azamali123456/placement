@@ -9,10 +9,10 @@ import { MailModule } from '../mail/mail.module';
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
-      JwtModule.register({
-        secret: 'Bookluxery',
-        // signOptions: { expiresIn: process.env.JWT_EXPIRATION_TIME || 3600}, // Adjust as needed
-      }),
+    JwtModule.register({
+      secret: 'Bookluxery',
+      // signOptions: { expiresIn: process.env.JWT_EXPIRATION_TIME || 3600}, // Adjust as needed
+    }),
 
     UserModule,
     MailModule,

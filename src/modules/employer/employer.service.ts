@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import {
   responseFailedMessage,
   responseSuccessMessage,
@@ -37,7 +37,7 @@ export class EmployerService {
       });
       // If the job is not found, handle it accordingly
       if (!empoyerUpdate) {
-        return responseFailedMessage('Employer-Info not found', 400);
+        return responseFailedMessage('Employer-Info not found');
       }
       // Update the job with the new data
       const updatedJob = await this.EmployerRepository.save({
@@ -49,8 +49,4 @@ export class EmployerService {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
   }
-
-
-  
- 
 }

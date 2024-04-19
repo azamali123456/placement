@@ -1,7 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn } from 'typeorm';
-import { IsBoolean, IsOptional } from 'class-validator';
+import { Entity, Column, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
+
 import { ApiProperty } from '@nestjs/swagger';
-import { Job } from '../job/job.entity';
 
 @Entity()
 export class Services extends BaseEntity {
@@ -13,9 +12,6 @@ export class Services extends BaseEntity {
   title!: string;
 
   @ApiProperty()
-  @Column('simple-array', { nullable: true }) 
+  @Column('simple-array', { nullable: true })
   pakages!: number[];
-
 }
-
-
