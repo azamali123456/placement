@@ -1,7 +1,7 @@
 import * as SendGrid from '@sendgrid/mail';
 import { Injectable } from '@nestjs/common';
 import { Client } from '@sendgrid/client';
-import {ClientRequest} from "@sendgrid/client/src/request";
+import { ClientRequest } from '@sendgrid/client/src/request';
 @Injectable()
 export class MailService {
   constructor() {
@@ -20,7 +20,7 @@ export class MailService {
       city: 'San Francisco',
       country: 'USA',
     };
-    const request:ClientRequest = {
+    const request: ClientRequest = {
       url: `/v3/verified_senders`,
       method: 'post',
       body: data,
@@ -64,5 +64,3 @@ export class MailService {
     }
   }
 }
-
-

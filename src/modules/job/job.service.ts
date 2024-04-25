@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { EmployerService } from '../employer/employer.service';
 import { responseSuccessMessage } from '../../constants/responce';
 import { Job } from '../job/job.entity';
-import { LessThanOrEqual, Like, MoreThanOrEqual, Repository } from 'typeorm';
+import { Brackets, LessThan, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ResponseCode } from 'src/exceptions';
 import { excludingWords } from '../../constants/job-search';
@@ -14,7 +14,7 @@ export class JobService {
     @InjectRepository(Job)
     private readonly jobRepository: Repository<Job>,
     private readonly employerService: EmployerService,
-  ) {}
+  ) { }
   // Create new User
   async createJob(jobDto: any): Promise<any> {
     try {
@@ -189,6 +189,7 @@ export class JobService {
           'job.specialSkills',
           'job.travelRequirements',
           'job.remoteJob',
+          'job.submitResume',
           'job.diaplayItem',
           'job.salary',
           'job.submittedDate',
@@ -314,6 +315,7 @@ export class JobService {
           .filter((word) => !excludingWords.includes(word))
           .join(' ');
       }
+       console.log(newText,"newText")
       let where1 = [];
       if (worksiteCity && keyword === undefined) {
         where1 = [
@@ -322,6 +324,8 @@ export class JobService {
               worksiteCity: Like(`%${worksiteCity}%`),
               state: Like(`%${state}%`),
             },
+            PSUSA_status:"Enabled",
+            endDate: MoreThan(new Date()),
           },
         ];
       } else if (newText && worksiteCity === undefined) {
@@ -331,16 +335,21 @@ export class JobService {
           where1 = [
             {
               jobTitle: Like(`%${newText}%`),
-              status: JobStatus.SUBMITTED,
+              PSUSA_status:"Enabled",
+              endDate: MoreThan(new Date()),
             },
             {
               requiredSkills: Like(`%${newText}%`),
-              status: JobStatus.SUBMITTED,
+              PSUSA_status:"Enabled",
+              endDate: MoreThan(new Date()),
+
             },
             {
               employerInfo: {
                 companyName: Like(`%${newText}%`),
               },
+              PSUSA_status:"Enabled",
+              endDate: MoreThan(new Date()),
             },
           ];
         }
@@ -351,7 +360,8 @@ export class JobService {
           where1 = [
             {
               jobTitle: Like(`%${newText}%`),
-              status: JobStatus.SUBMITTED,
+              PSUSA_status:"Enabled",
+              endDate: MoreThan(new Date()),
               employerInfo: {
                 worksiteCity: Like(`%${worksiteCity}%`),
                 state: Like(`%${state}%`),
@@ -359,7 +369,8 @@ export class JobService {
             },
             {
               requiredSkills: Like(`%${newText}%`),
-              status: JobStatus.SUBMITTED,
+              PSUSA_status:"Enabled",
+              endDate: MoreThan(new Date()),
               employerInfo: {
                 worksiteCity: Like(`%${worksiteCity}%`),
                 state: Like(`%${state}%`),
@@ -371,6 +382,8 @@ export class JobService {
                 worksiteCity: Like(`%${worksiteCity}%`),
                 state: Like(`%${state}%`),
               },
+              endDate: MoreThan(new Date()),
+              PSUSA_status:"Enabled",
             },
           ];
         }
@@ -395,6 +408,13 @@ export class JobService {
           'remoteJob',
           'varify',
           'jobType',
+          "resumeTo_PSUSA",
+          "agentData",
+          "submitResume",
+          "storeDate", 
+          "diaplayItem",
+          "PSUSA_status",
+          "endDate",
           'salary',
           'jobDuration',
           'requiredSkills',
@@ -408,104 +428,51 @@ export class JobService {
   }
 
   // Search submitted Jobs
+
+
+
+
   async SearchSubmittedJob(
     keyword: string,
     startDate: string,
     endDate: string,
   ): Promise<any> {
-    if (!keyword && !startDate && !endDate) {
-      throw new HttpException(
-        'Either keyword or date range must be provided',
-        ResponseCode.BAD_REQUEST,
-      );
-    }
-
     try {
-      const where1: any[] = [];
+      const queryBuilder = this.jobRepository.createQueryBuilder('job')
+        .where('job.status = :status', { status: JobStatus.SUBMITTED });
+
+      if (startDate) {
+        queryBuilder.andWhere('job.startDate >= :startDate', { startDate: new Date(startDate) });
+      }
+
+      if (endDate) {
+        queryBuilder.andWhere('job.endDate <= :endDate', { endDate: new Date(endDate) });
+      }
 
       if (keyword) {
-        where1.push(
-          {
-            jobTitle: Like(`%${keyword}%`),
-            status: JobStatus.SUBMITTED,
-          },
-          {
-            discription: Like(`%${keyword}%`),
-            status: JobStatus.SUBMITTED,
-          },
-          {
-            jobNumber: Like(`%${keyword}%`),
-            status: JobStatus.SUBMITTED,
-          },
-        );
+        queryBuilder.andWhere(new Brackets(qb => {
+          qb.where('job.jobTitle LIKE :keyword', { keyword: `%${keyword}%` })
+            .orWhere('job.jobNumber LIKE :keyword', { keyword: `%${keyword}%` })
+            .orWhere('job.agentData LIKE :keyword', { keyword: `%${keyword}%` })
+          // .orWhere('job.employerInfo.hiringManager LIKE :keyword', { keyword: `%${keyword}%` });
+        }));
       }
 
-      if (startDate && endDate) {
-        const startDateObj = new Date(startDate);
-        const endDateObj = new Date(endDate);
-        // endDateObj.setHours(23, 59, 59, 999); // Set end of day for endDate
-        where1.push({
-          startDate: MoreThanOrEqual(startDateObj),
-          endDate: LessThanOrEqual(endDateObj),
-        });
-      }
-      if (!startDate && endDate) {
-        const endDateObj = new Date(endDate);
-        endDateObj.setHours(23, 59, 59, 999); // Set end of day for endDate
-        where1.push({
-          endDate: LessThanOrEqual(endDateObj),
-        });
-      }
-      if (startDate && !endDate) {
-        const startDateObj = new Date(startDate);
-        where1.push({
-          startDate: MoreThanOrEqual(startDateObj),
-        });
-      }
-
-      // Handle the case where both startDate and endDate are provided
-
-      if (where1.length === 0) {
-        throw new HttpException(
-          'Invalid keyword or date range',
-          ResponseCode.BAD_REQUEST,
-        );
-      }
-
-      const result = await this.jobRepository.find({
-        where: where1,
-        relations: ['employerInfo', 'payments'],
-        // .leftJoinAndSelect('job.employerInfo', 'employerInfo')
-        // .leftJoinAndSelect('job.payments', 'payment')
-        select: [
-          'id',
-          'packagesId',
-          'jobNumber',
-          'endDate',
-          'startDate',
-          'userId',
-          'jobTitle',
-          'multiPosition',
-          'discription',
-          'educationAndExperience',
-          'specialSkills',
-          'travelRequirements',
-          'remoteJob',
-          'diaplayItem',
-          'varify',
-          'jobType',
-          'salary',
-          'jobDuration',
-          'requiredSkills',
-          'status',
-        ],
-      });
+      const result = await queryBuilder
+        .leftJoinAndSelect('job.employerInfo', 'employerInfo')
+        .leftJoinAndSelect('job.payments', 'payments')
+        .getMany();
 
       return result;
     } catch (err) {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
   }
+
+
+
+
+
 
   async getSortedList(
     sortBy: string,
@@ -514,7 +481,6 @@ export class JobService {
   ): Promise<any> {
     try {
       let orderOptions: { [key: string]: 'ASC' | 'DESC' } = {};
-
       // Define the default sorting order for each field
       const defaultSortOrder: { [key: string]: 'ASC' | 'DESC' } = {
         startDate: 'ASC',
@@ -523,12 +489,17 @@ export class JobService {
         jobTitle: 'ASC',
         jobNumber: 'ASC',
         agent: 'ASC',
+        hiringManager: 'ASC',
       };
+
+      console.log(sortBy, "sortBy", sortOrder);
 
       // Toggle sorting order if the same field is clicked again
       if (sortBy && sortOrder && defaultSortOrder[sortBy]) {
-        if (sortBy == 'agent') {
-          orderOptions[`agentData.${sortBy}`] = sortOrder;
+        if (sortBy === 'agent') {
+          orderOptions[`agentData`] = sortOrder;
+        } else if (sortBy === 'hiringManager') {
+          orderOptions['employerInfo.hiringManager'] = sortOrder;
         } else {
           orderOptions[sortBy] = sortOrder;
         }
@@ -543,8 +514,27 @@ export class JobService {
       if (keyword) {
         searchCriteria = {
           where: [
-            { jobTitle: Like(`%${keyword}%`) },
-            { jobNumber: Like(`%${keyword}%`) },
+            {
+              jobTitle: Like(`%${keyword}%`),
+              status: 'SUBMITTED' // Additional condition for status
+            },
+            {
+              jobNumber: Like(`%${keyword}%`),
+              status: 'SUBMITTED' // Additional condition for status
+            },
+            {
+              employerInfo: {
+                hiringManager: Like(`%${keyword}%`) // Search keyword in employerName field of employerInfo
+              }, // Additional condition for status
+            }
+          ],
+        };
+      } else {
+        searchCriteria = {
+          where: [
+            {
+              status: 'SUBMITTED' // Additional condition for status
+            }
           ],
         };
       }
@@ -553,6 +543,7 @@ export class JobService {
       const jobs: any[] = await this.jobRepository.find({
         ...searchCriteria,
         order: orderOptions,
+        relations: ['employerInfo'],
       });
 
       // Remove sensitive information before sending the response
@@ -563,6 +554,7 @@ export class JobService {
     }
   }
 
+
   // Jobs Varification
   async JobVarifivcation(id: any, jobDto: any): Promise<any> {
     try {
@@ -570,7 +562,15 @@ export class JobService {
       if (job.data.length === 0) {
         throw new HttpException('No Job found!', ResponseCode.BAD_REQUEST);
       } else {
+        if (jobDto.employerInfo) {
+          const data = await this.employerService.updateEmployerInfo(
+            job.data[0].employerInfo.id,
+            jobDto.employerInfo,
+          );
+        }
+        delete jobDto.employerInfo
         await this.jobRepository.update({ id: id }, jobDto);
+
         const updatedJob: any = await this.FindOne(id);
         return responseSuccessMessage(
           'Job Varified Successfull',
