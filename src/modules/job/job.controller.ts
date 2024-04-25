@@ -189,20 +189,14 @@ export class JobController {
   @Auth(Action.Read, 'User')
   @Patch('/update/status')
   @ApiOkResponse({ description: 'Update Job Status', type: Job })
-  async updateAddToCart(
-    @Query('id') id: number,
-    @Body() body: any,
-    @AuthUser() userInfo: any,
-  ) {
-    const userId = userInfo.id;
+  async updateAddToCart(@Query('id') id: number, @Body() body: any) {
     return this.jobService.updateJobStatus(id, body);
   }
 
   @Auth(Action.Read, 'User')
   @Patch('/update/status/all')
   @ApiOkResponse({ description: 'Update Job Status', type: Job })
-  async updateStatus(@Body() body: any, @AuthUser() userInfo: any) {
-    const userId = userInfo.id;
+  async updateStatus(@Body() body: any) {
     return this.jobService.updateAllJobsStstus(body);
   }
 

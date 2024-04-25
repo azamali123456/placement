@@ -9,7 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { JobStatus } from '../../constants/module-contants';
-import { IsInt, Min, Max, IsBoolean, IsOptional } from 'class-validator';
+import { IsInt, Min, Max, IsBoolean, IsOptional, IsString } from 'class-validator';
 import { EmployerInfo } from '../employer/employer.entity';
 import { Payment } from '../payment/payment.entity';
 import { Pakages } from '../pakages/pakages.entity';
@@ -64,11 +64,11 @@ export class Job extends BaseEntity {
   travelRequirements!: string;
 
   @ApiProperty()
-  @Column()
+  @Column({default:''})
   remoteJob!: string;
 
   @ApiProperty()
-  @Column()
+  @Column({default:''})
   @IsOptional()
   jobType!: string;
 
@@ -86,8 +86,8 @@ export class Job extends BaseEntity {
   @ApiProperty()
   @Column({
     type: 'date',
-    default: null, // Set the default to null
-    nullable: true, // Allow the column to be nullable
+    default: null, 
+    nullable: true, 
   })
   startDate!: Date;
 
@@ -123,7 +123,8 @@ export class Job extends BaseEntity {
 
   @ApiProperty()
   @Column()
-  referenceCode!: number;
+  @IsString()
+  referenceCode!: string;
 
   @ApiProperty()
   @Column()
@@ -167,21 +168,22 @@ export class Job extends BaseEntity {
   packages!: Pakages;
 
   @ApiProperty()
-  @Column({ type: 'json', nullable: false })
-  agentData: object;
+  @Column({ type: 'json', nullable: true })
+  @IsOptional()
+  agentData: any;
 
   @ApiProperty()
-  @Column({ nullable: false })
+  @Column({ nullable: true, })
   @IsOptional()
   invoiceCopyTo!: string;
 
   @ApiProperty()
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   @IsOptional()
   PSUSA_status!: string;
 
   @ApiProperty()
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   @IsBoolean()
   @IsOptional()
   resumeTo_PSUSA!: boolean;
@@ -190,18 +192,20 @@ export class Job extends BaseEntity {
   @IsOptional()
   @Column({
     type: 'date',
-    default: null, // Set the default to null
-    nullable: false, // Allow the column to be nullable
+    nullable: true, // Allow the column to be nullable
   })
   storeDate: Date;
 
   @ApiProperty()
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   @IsOptional()
   submitResume!: string;
-  
+
+ 
+
   @ApiProperty()
-  @Column({ type: 'json', nullable: false })
+  @Column({ type: 'json', nullable: true })
+  @IsOptional()
   diaplayItem: any;
 
   @ApiProperty()

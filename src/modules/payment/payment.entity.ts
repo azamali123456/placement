@@ -90,7 +90,7 @@ export class Payment extends BaseEntity {
   @ApiProperty()
   @Column({ type: 'json', nullable: true })
   @IsOptional()
-  customer: Object;
+  customer: object;
 
   @ApiProperty()
   @Column({ nullable: true })

@@ -191,7 +191,7 @@ export class PaymentService {
     try {
       const stripe = new Stripe(
         'sk_test_51NFKZLAgDjJFNJDFCKn6K3RAcVhlQ4xnm6TaKI6ddKkHdfxT3928rcB8baVoB3XCFoscIrllGpeuPjRmwWAVt6qJ00vrjPBTnF',
-        {apiVersion:'2022-11-15'},
+        { apiVersion: '2022-11-15' },
       );
       let amount: any = 0;
       let description: any = '';
@@ -203,7 +203,7 @@ export class PaymentService {
         token = object[x].token;
         currency = 'usd';
       }
-      const charge:Stripe.Charge = await stripe.charges.create({
+      const charge: Stripe.Charge = await stripe.charges.create({
         amount,
         currency,
         description,
@@ -230,17 +230,29 @@ export class PaymentService {
           varify: true,
           refunded: charge.refunded,
           receipt_email: object[0].billingMethod.email,
-          payment_method_details:  typeof charge.payment_method_details=='object'?charge.payment_method_details:{},
+          payment_method_details:
+            typeof charge.payment_method_details == 'object'
+              ? charge.payment_method_details
+              : {},
           payment_method: charge.payment_method,
-          payment_intent: typeof charge.payment_intent=='string'?charge.payment_intent:charge.payment_intent.id,
+          payment_intent:
+            typeof charge.payment_intent == 'string'
+              ? charge.payment_intent
+              : charge.payment_intent.id,
           paid: charge.paid,
-          invoice: typeof charge.invoice=='string'?charge.invoice:charge.invoice.id,
-          customer: typeof charge.customer=='object'? charge.customer:{},
+          invoice:
+            typeof charge.invoice == 'string'
+              ? charge.invoice
+              : charge.invoice.id,
+          customer: typeof charge.customer == 'object' ? charge.customer : {},
           currency: charge.currency,
           created: charge.created,
           receipt_url: charge.receipt_url,
           billing_details: charge.billing_details,
-          balance_transaction: typeof charge.balance_transaction=='string'? charge.balance_transaction:charge.balance_transaction.id,
+          balance_transaction:
+            typeof charge.balance_transaction == 'string'
+              ? charge.balance_transaction
+              : charge.balance_transaction.id,
           amount_refunded: charge.amount_refunded,
           amount_captured: charge.amount_captured,
           amount: charge.amount,

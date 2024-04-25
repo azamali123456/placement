@@ -221,6 +221,8 @@ export class UserService {
           { firstName: Like(`%${keyword}%`) },
           { lastName: Like(`%${keyword}%`) },
           { users_email: Like(`%${keyword}%`) },
+          { phone: Like(`%${keyword}%`) },
+          { companyName: Like(`%${keyword}%`) },
         ],
         order: {
           registerDate: 'ASC',
