@@ -183,6 +183,8 @@ export class Job extends BaseEntity {
   @BeforeInsert()
   setDefaultSubmittedDate() {
     this.submittedDate = new Date();
+    this.storeDate = new Date();
+
     // this.startDate = new Date(); // Set the default value on insert
   }
 }

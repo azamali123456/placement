@@ -191,6 +191,7 @@ export class JobService {
           'job.status',
           'job.specialInstructions',
           'job.recruitmentFirm',
+          'job.storeDate',
           'job.referenceCode',
           'employerInfo.id',
           'employerInfo.companyName',
