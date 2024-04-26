@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  BaseEntity,
+  BeforeInsert,
+} from 'typeorm';
 import {
   IsInt,
   IsDefined,
@@ -8,6 +14,7 @@ import {
   IsOptional,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { userType } from 'src/constants';
 @Entity()
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
@@ -69,8 +76,17 @@ export class User extends BaseEntity {
   @IsNotEmpty({ message: 'zipCode should not be empty' })
   zipCode: number;
 
-  @Column({ default: 'Employeer' })
+  @Column({ default: userType.EMPLOYER })
   @IsString()
   @IsOptional()
   role?: string;
+
+  @ApiProperty()
+  @Column({ type: 'date', nullable: true })
+  registerDate: Date;
+
+  @BeforeInsert()
+  setDefaultSubmittedDate() {
+    this.registerDate = new Date();
+  }
 }

@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, BaseEntity, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  BaseEntity,
+  OneToMany,
+} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Job } from '../job/job.entity';
 
@@ -19,9 +25,6 @@ export class Pakages extends BaseEntity {
   @Column({ nullable: true })
   discription!: string;
 
-  @OneToMany(type => Job, job => job.packages) // Define the inverse relation to Job entity
+  @OneToMany(() => Job, (job) => job.packages) // Define the inverse relation to Job entity
   jobs: Job[];
-
 }
-
-

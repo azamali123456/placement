@@ -17,6 +17,4 @@ export class PaymentPayloadDto {
 
   @ApiProperty()
   userId: number;
-
-
 }

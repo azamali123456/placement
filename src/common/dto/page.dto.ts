@@ -1,4 +1,4 @@
-export class PageDto<T> {
+export class PageDto {
   readonly total: number;
   readonly data: [];
 

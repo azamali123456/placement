@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  BaseEntity,
+  ManyToOne,
+} from 'typeorm';
 import { IsBoolean, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Job } from '../job/job.entity';
@@ -13,15 +19,13 @@ export class Payment extends BaseEntity {
   @IsOptional()
   object!: string;
 
-
-
   @ApiProperty()
   @Column({
     type: 'boolean',
     default: false,
   })
   @IsBoolean()
-  varify!: boolean
+  varify!: boolean;
 
   @ApiProperty()
   @Column({ nullable: true })
@@ -38,15 +42,15 @@ export class Payment extends BaseEntity {
   @IsOptional()
   amount_refunded!: number;
 
-
-
-
-
   @ApiProperty()
   @Column({ nullable: true })
   @IsOptional()
   balance_transaction!: string;
 
+  @ApiProperty()
+  @Column({ nullable: true })
+  @IsOptional()
+  receipt_url!: string;
   // Billing Details
   @ApiProperty()
   @Column({ type: 'json', nullable: true })
@@ -73,11 +77,6 @@ export class Payment extends BaseEntity {
     userId: number | null;
   };
 
-
-
-
-
-
   @ApiProperty()
   @Column({ nullable: true })
   @IsOptional()
@@ -91,38 +90,12 @@ export class Payment extends BaseEntity {
   @ApiProperty()
   @Column({ type: 'json', nullable: true })
   @IsOptional()
-  customer!: {
-    address: {
-      city: string | null;
-      country: string;
-      line1: string | null;
-      line2: string | null;
-      postal_code: string | null;
-      state: string | null;
-    };
-    email: string;
-    name: string;
-    phone: string | null;
-    tax_exempt: string;
-    tax_ids: string[]; // or an array of the appropriate type
-  };
-
-
-
-
-
-
-
-
+  customer: object;
 
   @ApiProperty()
   @Column({ nullable: true })
   @IsOptional()
   invoice!: string;
-
-
-
-
 
   @ApiProperty()
   @Column({ nullable: true })
@@ -155,10 +128,22 @@ export class Payment extends BaseEntity {
       country: string;
       exp_month: number;
       exp_year: number;
+      extended_authorization?: any;
+      fingerprint?: string;
+      funding?: string;
+      incremental_authorization?: any;
+      installments?: number | null;
+      last4: string;
+      mandate?: any;
+      multicapture?: any;
+      network: string;
+      network_token?: any;
+      overcapture?: any;
+      three_d_secure?: any;
+      wallet?: any;
     };
     type: string;
   };
-
 
   @ApiProperty()
   @Column({ type: 'json', nullable: true })
@@ -193,7 +178,7 @@ export class Payment extends BaseEntity {
 
   // Payment entity
 
-  @ManyToOne(() => Job, job => job.payments)
+  @ManyToOne(() => Job, (job) => job.payments)
   // @JoinColumn({ name: 'jobId', referencedColumnName: 'id' })
   job: Job;
 
@@ -205,8 +190,4 @@ export class Payment extends BaseEntity {
   @ApiProperty()
   @Column({ nullable: true })
   jobId!: number;
-
-
 }
-
-
