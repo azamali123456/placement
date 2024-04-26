@@ -9,7 +9,14 @@ import {
   OneToMany,
 } from 'typeorm';
 import { JobStatus } from '../../constants/module-contants';
-import { IsInt, Min, Max, IsBoolean, IsOptional, IsString } from 'class-validator';
+import {
+  IsInt,
+  Min,
+  Max,
+  IsBoolean,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { EmployerInfo } from '../employer/employer.entity';
 import { Payment } from '../payment/payment.entity';
 import { Pakages } from '../pakages/pakages.entity';
@@ -64,11 +71,11 @@ export class Job extends BaseEntity {
   travelRequirements!: string;
 
   @ApiProperty()
-  @Column({default:''})
+  @Column({ default: '' })
   remoteJob!: string;
 
   @ApiProperty()
-  @Column({default:''})
+  @Column({ default: '' })
   @IsOptional()
   jobType!: string;
 
@@ -86,8 +93,8 @@ export class Job extends BaseEntity {
   @ApiProperty()
   @Column({
     type: 'date',
-    default: null, 
-    nullable: true, 
+    default: null,
+    nullable: true,
   })
   startDate!: Date;
 
@@ -173,7 +180,7 @@ export class Job extends BaseEntity {
   agentData: any;
 
   @ApiProperty()
-  @Column({ nullable: true, })
+  @Column({ nullable: true })
   @IsOptional()
   invoiceCopyTo!: string;
 
@@ -200,8 +207,6 @@ export class Job extends BaseEntity {
   @Column({ nullable: true })
   @IsOptional()
   submitResume!: string;
-
- 
 
   @ApiProperty()
   @Column({ type: 'json', nullable: true })
