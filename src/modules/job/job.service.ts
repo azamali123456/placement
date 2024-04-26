@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { EmployerService } from '../employer/employer.service';
 import { responseSuccessMessage } from '../../constants/responce';
 import { Job } from '../job/job.entity';
-import { Brackets, LessThan, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
+import { Brackets, Like, MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ResponseCode } from 'src/exceptions';
 import { excludingWords } from '../../constants/job-search';
@@ -14,7 +14,7 @@ export class JobService {
     @InjectRepository(Job)
     private readonly jobRepository: Repository<Job>,
     private readonly employerService: EmployerService,
-  ) { }
+  ) {}
   // Create new User
   async createJob(jobDto: any): Promise<any> {
     try {
@@ -315,7 +315,7 @@ export class JobService {
           .filter((word) => !excludingWords.includes(word))
           .join(' ');
       }
-       console.log(newText,"newText")
+      console.log(newText, 'newText');
       let where1 = [];
       if (worksiteCity && keyword === undefined) {
         where1 = [
@@ -324,7 +324,7 @@ export class JobService {
               worksiteCity: Like(`%${worksiteCity}%`),
               state: Like(`%${state}%`),
             },
-            PSUSA_status:"Enabled",
+            PSUSA_status: 'Enabled',
             endDate: MoreThan(new Date()),
           },
         ];
@@ -335,20 +335,19 @@ export class JobService {
           where1 = [
             {
               jobTitle: Like(`%${newText}%`),
-              PSUSA_status:"Enabled",
+              PSUSA_status: 'Enabled',
               endDate: MoreThan(new Date()),
             },
             {
               requiredSkills: Like(`%${newText}%`),
-              PSUSA_status:"Enabled",
+              PSUSA_status: 'Enabled',
               endDate: MoreThan(new Date()),
-
             },
             {
               employerInfo: {
                 companyName: Like(`%${newText}%`),
               },
-              PSUSA_status:"Enabled",
+              PSUSA_status: 'Enabled',
               endDate: MoreThan(new Date()),
             },
           ];
@@ -360,7 +359,7 @@ export class JobService {
           where1 = [
             {
               jobTitle: Like(`%${newText}%`),
-              PSUSA_status:"Enabled",
+              PSUSA_status: 'Enabled',
               endDate: MoreThan(new Date()),
               employerInfo: {
                 worksiteCity: Like(`%${worksiteCity}%`),
@@ -369,7 +368,7 @@ export class JobService {
             },
             {
               requiredSkills: Like(`%${newText}%`),
-              PSUSA_status:"Enabled",
+              PSUSA_status: 'Enabled',
               endDate: MoreThan(new Date()),
               employerInfo: {
                 worksiteCity: Like(`%${worksiteCity}%`),
@@ -383,7 +382,7 @@ export class JobService {
                 state: Like(`%${state}%`),
               },
               endDate: MoreThan(new Date()),
-              PSUSA_status:"Enabled",
+              PSUSA_status: 'Enabled',
             },
           ];
         }
@@ -408,13 +407,13 @@ export class JobService {
           'remoteJob',
           'varify',
           'jobType',
-          "resumeTo_PSUSA",
-          "agentData",
-          "submitResume",
-          "storeDate", 
-          "diaplayItem",
-          "PSUSA_status",
-          "endDate",
+          'resumeTo_PSUSA',
+          'agentData',
+          'submitResume',
+          'storeDate',
+          'diaplayItem',
+          'PSUSA_status',
+          'endDate',
           'salary',
           'jobDuration',
           'requiredSkills',
@@ -429,38 +428,56 @@ export class JobService {
 
   // Search submitted Jobs
 
-
-
-
   async SearchSubmittedJob(
     keyword: string,
     startDate: string,
     endDate: string,
+    sortBy: string,
+    sortOrder: any,
   ): Promise<any> {
     try {
-      const queryBuilder = this.jobRepository.createQueryBuilder('job')
+      const queryBuilder = this.jobRepository
+        .createQueryBuilder('job')
         .where('job.status = :status', { status: JobStatus.SUBMITTED });
 
       if (startDate) {
-        queryBuilder.andWhere('job.startDate >= :startDate', { startDate: new Date(startDate) });
+        queryBuilder.andWhere('job.startDate >= :startDate', {
+          startDate: new Date(startDate),
+        });
       }
 
       if (endDate) {
-        queryBuilder.andWhere('job.endDate <= :endDate', { endDate: new Date(endDate) });
+        queryBuilder.andWhere('job.endDate <= :endDate', {
+          endDate: new Date(endDate),
+        });
       }
 
       if (keyword) {
-        queryBuilder.andWhere(new Brackets(qb => {
-          qb.where('job.jobTitle LIKE :keyword', { keyword: `%${keyword}%` })
-            .orWhere('job.jobNumber LIKE :keyword', { keyword: `%${keyword}%` })
-            .orWhere('job.agentData LIKE :keyword', { keyword: `%${keyword}%` })
-          // .orWhere('job.employerInfo.hiringManager LIKE :keyword', { keyword: `%${keyword}%` });
-        }));
+        queryBuilder.andWhere(
+          new Brackets((qb) => {
+            qb.where('job.jobTitle LIKE :keyword', { keyword: `%${keyword}%` })
+              .orWhere('job.jobNumber LIKE :keyword', {
+                keyword: `%${keyword}%`,
+              })
+              .orWhere('job.agentData LIKE :keyword', {
+                keyword: `%${keyword}%`,
+              })
+              .orWhere('employerInfo.hiringManager LIKE :keyword', {
+                keyword: `%${keyword}%`,
+              });
+          }),
+        );
       }
-
+      if (sortBy == 'hiringManager') {
+        sortBy = 'employerInfo.hiringManager';
+      }
+      if (sortBy == 'agent') {
+        sortBy = 'agentData.agent';
+      }
       const result = await queryBuilder
         .leftJoinAndSelect('job.employerInfo', 'employerInfo')
         .leftJoinAndSelect('job.payments', 'payments')
+        .orderBy(sortBy, sortOrder)
         .getMany();
 
       return result;
@@ -468,11 +485,6 @@ export class JobService {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
   }
-
-
-
-
-
 
   async getSortedList(
     sortBy: string,
@@ -492,7 +504,7 @@ export class JobService {
         hiringManager: 'ASC',
       };
 
-      console.log(sortBy, "sortBy", sortOrder);
+      console.log(sortBy, 'sortBy', sortOrder);
 
       // Toggle sorting order if the same field is clicked again
       if (sortBy && sortOrder && defaultSortOrder[sortBy]) {
@@ -516,25 +528,25 @@ export class JobService {
           where: [
             {
               jobTitle: Like(`%${keyword}%`),
-              status: 'SUBMITTED' // Additional condition for status
+              status: 'SUBMITTED', // Additional condition for status
             },
             {
               jobNumber: Like(`%${keyword}%`),
-              status: 'SUBMITTED' // Additional condition for status
+              status: 'SUBMITTED', // Additional condition for status
             },
             {
               employerInfo: {
-                hiringManager: Like(`%${keyword}%`) // Search keyword in employerName field of employerInfo
+                hiringManager: Like(`%${keyword}%`), // Search keyword in employerName field of employerInfo
               }, // Additional condition for status
-            }
+            },
           ],
         };
       } else {
         searchCriteria = {
           where: [
             {
-              status: 'SUBMITTED' // Additional condition for status
-            }
+              status: 'SUBMITTED', // Additional condition for status
+            },
           ],
         };
       }
@@ -554,7 +566,6 @@ export class JobService {
     }
   }
 
-
   // Jobs Varification
   async JobVarifivcation(id: any, jobDto: any): Promise<any> {
     try {
@@ -563,12 +574,12 @@ export class JobService {
         throw new HttpException('No Job found!', ResponseCode.BAD_REQUEST);
       } else {
         if (jobDto.employerInfo) {
-          const data = await this.employerService.updateEmployerInfo(
+          await this.employerService.updateEmployerInfo(
             job.data[0].employerInfo.id,
             jobDto.employerInfo,
           );
         }
-        delete jobDto.employerInfo
+        delete jobDto.employerInfo;
         await this.jobRepository.update({ id: id }, jobDto);
 
         const updatedJob: any = await this.FindOne(id);

@@ -1,7 +1,8 @@
 import { IsInt } from 'class-validator';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 import { ApiProperty } from '@nestjs/swagger';
+import { Job } from '../job/job.entity';
 @Entity()
 export class EmployerInfo {
   @PrimaryGeneratedColumn()
@@ -43,6 +44,6 @@ export class EmployerInfo {
   @IsInt()
   worksiteZipCode!: number;
 
-  // @OneToMany(() => Job, (job) => job.employerId)
-  // jobs: Job[];
+  @OneToMany(() => Job, (job) => job.employerId)
+  jobs: Job[];
 }

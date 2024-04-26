@@ -126,8 +126,22 @@ export class JobController {
     @Query('keyword') keyword: string,
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
+    @Query('sortBy') sortBy: string,
+    @Query('sortOrder') sortOrder: string,
   ) {
-    return this.jobService.SearchSubmittedJob(keyword, startDate, endDate);
+    if (sortOrder == 'ascend') {
+      sortOrder = 'ASC';
+    } else {
+      sortOrder = 'DESC';
+    }
+
+    return this.jobService.SearchSubmittedJob(
+      keyword,
+      startDate,
+      endDate,
+      sortBy,
+      sortOrder,
+    );
   }
 
   @Get('/sorted/list')
