@@ -122,7 +122,7 @@ export class JobController {
       sortOrder,
     );
   }
-// Sorting and saerch Jobs List
+  // Sorting and saerch Jobs List
   @Get('/sorted/list')
   @HttpCode(HttpStatus.OK)
   @Auth(Action.Read, 'User')
@@ -140,7 +140,7 @@ export class JobController {
     }
     return this.jobService.getSortedList(sortBy, sortOrder, keyword);
   }
- // Job Varification
+  // Job Varification
   @Patch('/varification')
   async jobVarification(@Query('id') id: number, @Body() body: any) {
     return this.jobService.JobVarifivcation(id, body);
@@ -182,13 +182,11 @@ export class JobController {
     return this.jobService.updateJobStatus(id, body);
   }
 
-    // Add To Cart All Jobs
+  // Add To Cart All Jobs
   @Auth(Action.Read, 'User')
   @Patch('/update/status/all')
   @ApiOkResponse({ description: 'Update Job Status', type: Job })
   async updateStatus(@Body() body: any) {
     return this.jobService.updateAllJobsStstus(body);
   }
-
-  
 }

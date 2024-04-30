@@ -222,7 +222,7 @@ export class JobService {
         .andWhere('job.status = :status', { status })
         .orderBy('job.submittedDate', 'DESC')
         .getMany();
-       
+
       return responseSuccessMessage(`Your Submitted Jobs list`, data, 200);
     } catch (err) {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
@@ -539,12 +539,12 @@ export class JobService {
               employerInfo: {
                 hiringManager: Like(`%${keyword}%`), // Search keyword in employerName field of employerInfo
               },
-              status: 'SUBMITTED', 
+              status: 'SUBMITTED',
             },
             {
               employerInfo: {
                 companyName: Like(`%${keyword}%`), // Search keyword in employerName field of employerInfo
-              }, 
+              },
               status: 'SUBMITTED',
             },
           ],

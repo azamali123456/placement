@@ -103,9 +103,13 @@ export class AuthController {
   @Auth(Action.Read, 'User')
   @ApiBody({ required: true, type: User })
   @ApiOkResponse({ type: User, description: 'Edit Customer Account' })
-  editCustomer(@AuthUser() user: User, @Query('id') id: number, @Body() body: any) {
-     if(user.role === 'ADMIN'){
+  editCustomer(
+    @AuthUser() user: User,
+    @Query('id') id: number,
+    @Body() body: any,
+  ) {
+    if (user.role === 'ADMIN') {
       return this.userService.updateUser(Number(id), body);
-     }
+    }
   }
 }

@@ -1,4 +1,11 @@
-import { Controller, Get, HttpCode, HttpException, HttpStatus, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  Query,
+} from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { LoggerService } from '../../logger/logger.service';
@@ -21,7 +28,7 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @Auth(Action.Read, 'User')
   @ApiOkResponse({ type: User, description: 'Users list' })
-  getCurrentUser(@AuthUser() user: any,): any {
+  getCurrentUser(@AuthUser() user: any): any {
     if (user.role === 'EMPLOYER') {
       throw new HttpException('Forbidden resource', ResponseCode.FORBIDDEN);
     }
@@ -39,7 +46,6 @@ export class UserController {
     @Query('sortOrder') sortOrder: string,
     @Query('keyword') keyword: string,
   ): any {
-
     if (user.role === 'EMPLOYER') {
       throw new HttpException('Forbidden resource', ResponseCode.FORBIDDEN);
     } else {

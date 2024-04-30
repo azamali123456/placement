@@ -35,7 +35,10 @@ export class AuthService {
     ) {
       return user;
     }
-    throw new HttpException('Email or password does not match', ResponseCode.BAD_REQUEST);
+    throw new HttpException(
+      'Email or password does not match',
+      ResponseCode.BAD_REQUEST,
+    );
   }
   // Forget Pssword
   async forgetPsswordApi(userDto: any): Promise<any> {

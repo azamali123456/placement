@@ -87,7 +87,6 @@ export class User extends BaseEntity {
   @Column({ type: 'date', nullable: true })
   registerDate: Date;
 
-
   @Column()
   @IsString()
   @IsOptional()
@@ -113,7 +112,6 @@ export class User extends BaseEntity {
   @IsOptional()
   customerDiscount?: number;
 
-  
   @Column()
   @IsNumber()
   @IsOptional()
@@ -133,7 +131,6 @@ export class User extends BaseEntity {
   @IsBoolean()
   @IsOptional()
   newsletter?: boolean;
-  
 
   @BeforeInsert()
   setDefaultSubmittedDate() {
