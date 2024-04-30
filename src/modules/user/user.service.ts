@@ -15,7 +15,7 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly entityManager: EntityManager,
-  ) {}
+  ) { }
   // Find By Email
   async findByEmail(
     options: Partial<{ users_email: string }>,
@@ -101,6 +101,13 @@ export class UserService {
   // Update User
   async updateUser(id: any, userDto: User): Promise<any> {
     try {
+      if (userDto.users_password) {
+        const hashedPassword = await bcrypt.hash(
+          userDto.users_password,
+          10,
+        );
+        userDto.users_password = hashedPassword;
+      }
       await this.userRepository.update(id, userDto);
       const updatedUser: any = await this.userRepository.findOne({
         where: { id: id },
@@ -112,6 +119,7 @@ export class UserService {
         200,
       );
     } catch (err) {
+      console.log(err.message)
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
   }
@@ -155,8 +163,28 @@ export class UserService {
         order: {
           registerDate: 'DESC',
         },
+        select: [
+          "id",
+          "users_email",
+          "firstName",
+          "lastName",
+          "companyName",
+          "phone",
+          "address",
+          "city",
+          "zipCode",
+          "role",
+          "address2",
+          "faxNumber",
+          "country",
+          "customerType",
+          "customerDiscount",
+          "rewardPoints",
+          "hearFrom",
+          "referredBy",
+          "newsletter",
+        ]
       });
-      users.forEach((user) => delete user.users_password);
       return responseSuccessMessage('Users List!', users, 200);
     } catch (err) {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);

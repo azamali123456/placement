@@ -12,6 +12,8 @@ import {
   IsNotEmpty,
   IsString,
   IsOptional,
+  IsNumber,
+  IsBoolean,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { userType } from 'src/constants';
@@ -66,7 +68,7 @@ export class User extends BaseEntity {
   @ApiProperty()
   @Column()
   @IsDefined()
-  @IsNotEmpty({ message: 'city should not be empty' })
+  @IsNotEmpty({ message: 'city/State should not be empty' })
   city: string;
 
   @ApiProperty()
@@ -84,6 +86,54 @@ export class User extends BaseEntity {
   @ApiProperty()
   @Column({ type: 'date', nullable: true })
   registerDate: Date;
+
+
+  @Column()
+  @IsString()
+  @IsOptional()
+  address2?: string;
+
+  @Column()
+  @IsString()
+  @IsOptional()
+  faxNumber?: string;
+
+  @Column()
+  @IsString()
+  @IsOptional()
+  country?: string;
+
+  @Column()
+  @IsString()
+  @IsOptional()
+  customerType?: string;
+
+  @Column()
+  @IsNumber()
+  @IsOptional()
+  customerDiscount?: number;
+
+  
+  @Column()
+  @IsNumber()
+  @IsOptional()
+  rewardPoints?: number;
+
+  @Column()
+  @IsString()
+  @IsOptional()
+  hearFrom?: string;
+
+  @Column()
+  @IsString()
+  @IsOptional()
+  referredBy?: string;
+
+  @Column()
+  @IsBoolean()
+  @IsOptional()
+  newsletter?: boolean;
+  
 
   @BeforeInsert()
   setDefaultSubmittedDate() {

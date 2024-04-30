@@ -1,10 +1,11 @@
-import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpException, HttpStatus, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { LoggerService } from '../../logger/logger.service';
 import { Auth, AuthUser } from 'src/decorators';
 import { Action } from 'src/casl/userRoles';
 import { User } from './user.entity';
+import { ResponseCode } from 'src/exceptions';
 
 @Controller('user')
 @ApiTags('users')
@@ -20,7 +21,10 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @Auth(Action.Read, 'User')
   @ApiOkResponse({ type: User, description: 'Users list' })
-  getCurrentUser(): any {
+  getCurrentUser(@AuthUser() user: any,): any {
+    if (user.role === 'EMPLOYER') {
+      throw new HttpException('Forbidden resource', ResponseCode.FORBIDDEN);
+    }
     return this.userService.getList();
   }
 
@@ -35,12 +39,17 @@ export class UserController {
     @Query('sortOrder') sortOrder: string,
     @Query('keyword') keyword: string,
   ): any {
-    if (sortOrder == 'ascend') {
-      sortOrder = 'ASC';
+
+    if (user.role === 'EMPLOYER') {
+      throw new HttpException('Forbidden resource', ResponseCode.FORBIDDEN);
     } else {
-      sortOrder = 'DESC';
+      if (sortOrder == 'ascend') {
+        sortOrder = 'ASC';
+      } else {
+        sortOrder = 'DESC';
+      }
+      return this.userService.getSortedList(sortBy, sortOrder, keyword);
     }
-    return this.userService.getSortedList(sortBy, sortOrder, keyword);
   }
 
   // Sort Now
@@ -49,6 +58,9 @@ export class UserController {
   @Auth(Action.Read, 'User')
   @ApiOkResponse({ type: User, description: 'Users list' })
   getSearchList(@AuthUser() user: any, @Query('keyword') keyword: string): any {
+    if (user.role === 'EMPLOYER') {
+      throw new HttpException('Forbidden resource', ResponseCode.FORBIDDEN);
+    }
     return this.userService.getSearchList(keyword);
   }
 }

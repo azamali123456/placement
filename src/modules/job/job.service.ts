@@ -222,6 +222,7 @@ export class JobService {
         .andWhere('job.status = :status', { status })
         .orderBy('job.submittedDate', 'DESC')
         .getMany();
+       
       return responseSuccessMessage(`Your Submitted Jobs list`, data, 200);
     } catch (err) {
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
@@ -510,7 +511,7 @@ export class JobService {
       // Toggle sorting order if the same field is clicked again
       if (sortBy && sortOrder && defaultSortOrder[sortBy]) {
         if (sortBy === 'agent') {
-          orderOptions[`agentData`] = sortOrder;
+          orderOptions['employerInfo.companyName'] = sortOrder;
         } else if (sortBy === 'hiringManager') {
           orderOptions['employerInfo.hiringManager'] = sortOrder;
         } else {
@@ -520,7 +521,6 @@ export class JobService {
         // Use the default sorting order for the selected field
         orderOptions = { [sortBy]: defaultSortOrder[sortBy] };
       }
-
       // Define search criteria based on the keyword
       let searchCriteria = {};
 
@@ -538,7 +538,14 @@ export class JobService {
             {
               employerInfo: {
                 hiringManager: Like(`%${keyword}%`), // Search keyword in employerName field of employerInfo
-              }, // Additional condition for status
+              },
+              status: 'SUBMITTED', 
+            },
+            {
+              employerInfo: {
+                companyName: Like(`%${keyword}%`), // Search keyword in employerName field of employerInfo
+              }, 
+              status: 'SUBMITTED',
             },
           ],
         };

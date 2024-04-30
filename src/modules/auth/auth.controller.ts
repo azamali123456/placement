@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Action } from '../../casl/userRoles';
@@ -92,8 +93,19 @@ export class AuthController {
   @Get('me')
   @HttpCode(HttpStatus.OK)
   @Auth(Action.Read, 'User')
-  @ApiOkResponse({ type: User, description: 'current user info' })
+  @ApiOkResponse({ type: User, description: 'Get Current User Info' })
   getCurrentUser(@AuthUser() user: User): User {
     return user;
+  }
+
+  @Patch('edit-customer')
+  @HttpCode(HttpStatus.OK)
+  @Auth(Action.Read, 'User')
+  @ApiBody({ required: true, type: User })
+  @ApiOkResponse({ type: User, description: 'Edit Customer Account' })
+  editCustomer(@AuthUser() user: User, @Query('id') id: number, @Body() body: any) {
+     if(user.role === 'ADMIN'){
+      return this.userService.updateUser(Number(id), body);
+     }
   }
 }
