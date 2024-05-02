@@ -84,7 +84,7 @@ export class User extends BaseEntity {
   role?: string;
 
   @ApiProperty()
-  @Column({ type: 'date', nullable: true })
+  @Column({  type: 'datetime' ,nullable: true })
   registerDate: Date;
 
   @Column()
