@@ -171,7 +171,7 @@ export class JobService {
       const data: any = await this.jobRepository
         .createQueryBuilder('job')
         .leftJoinAndSelect('job.employerInfo', 'employerInfo')
-        .leftJoinAndSelect('job.payments', 'payment')
+         .leftJoinAndSelect('job.payments', 'payment')
         .leftJoinAndSelect('job.packages', 'packages')
         .select([
           'job.id',
@@ -195,9 +195,9 @@ export class JobService {
           'job.submittedDate',
           'job.jobDuration',
           'job.startDate',
-          'job.endDate',
-          'job.requiredSkills',
-          'job.status',
+           'job.endDate',
+           //'job.requiredSkills',
+           'job.status',
           'job.specialInstructions',
           'job.recruitmentFirm',
           'job.referenceCode',
@@ -216,7 +216,7 @@ export class JobService {
           'job.PSUSA_status',
           'job.resumeTo_PSUSA',
           'job.storeDate',
-          'payment',
+         'payment',
           'packages',
         ])
         .andWhere('job.status = :status', { status })
