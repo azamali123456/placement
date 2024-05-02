@@ -153,7 +153,7 @@ export class UserService {
     }
   }
 
-  // Get Users List registerDate
+  // Get Users List Register Date
   async getList(): Promise<any> {
     try {
       const users: any[] = await this.userRepository.find({
@@ -180,6 +180,7 @@ export class UserService {
           'hearFrom',
           'referredBy',
           'newsletter',
+          'registerDate',
         ],
       });
       return responseSuccessMessage('Users List!', users, 200);
