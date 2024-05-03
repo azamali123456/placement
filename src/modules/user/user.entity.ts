@@ -134,6 +134,9 @@ export class User extends BaseEntity {
 
   @BeforeInsert()
   setDefaultSubmittedDate() {
-    this.registerDate = new Date();
+    // Get the current date and time in the USA time zone
+    const usaTime = new Date().toLocaleString('en-US', { timeZone: 'America/New_York' });
+    // Parse the string representation back into a Date object
+    this.registerDate = new Date(usaTime);
   }
 }
