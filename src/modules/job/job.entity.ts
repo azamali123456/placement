@@ -219,9 +219,8 @@ export class Job extends BaseEntity {
 
   @BeforeInsert()
   setDefaultSubmittedDate() {
-    this.submittedDate = new Date();
-    this.storeDate = new Date();
-
-    // this.startDate = new Date(); // Set the default value on insert
+    const usaTime = new Date().toLocaleString('en-US', { timeZone: 'America/New_York' });
+    this.submittedDate = new Date(usaTime);
+    this.storeDate = new Date(usaTime);
   }
 }
