@@ -25,7 +25,7 @@ import { PakagesModule } from './modules/pakages/pakages.module';
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-    //  host: 'sql.freedb.tech', // Local
+      //  host: 'sql.freedb.tech', // Local
       host: 'sql.freedb.tech', // live
       port: 3306,
       // username: 'freedb_imran', // Local
