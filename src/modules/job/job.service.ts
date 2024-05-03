@@ -418,7 +418,8 @@ export class JobService {
           'endDate',
           'salary',
           'jobDuration',
-          'requiredSkills',
+          'submitResume',
+          // 'requiredSkills',
           'status',
         ],
       });
@@ -565,11 +566,10 @@ export class JobService {
         order: orderOptions,
         relations: ['employerInfo'],
       });
-
       // Remove sensitive information before sending the response
-
       return responseSuccessMessage('Sorted Jobs List!', jobs, 200);
     } catch (err) {
+       console.log(err)
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
   }
@@ -592,7 +592,7 @@ export class JobService {
 
         const updatedJob: any = await this.FindOne(id);
         return responseSuccessMessage(
-          'Job Varified Successfull',
+          'Job Varified Successful',
           updatedJob.data[0],
           200,
         );
@@ -635,6 +635,9 @@ export class JobService {
           'jobDuration',
           'requiredSkills',
           'status',
+          'submitResume',
+          'resumeTo_PSUSA',
+          'PSUSA_status'
         ],
       });
       if (result.length === 0) {
