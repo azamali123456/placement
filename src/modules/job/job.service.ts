@@ -14,7 +14,7 @@ export class JobService {
     @InjectRepository(Job)
     private readonly jobRepository: Repository<Job>,
     private readonly employerService: EmployerService,
-  ) {}
+  ) { }
   // Create new User
   async createJob(jobDto: any): Promise<any> {
     try {
@@ -171,7 +171,7 @@ export class JobService {
       const data: any = await this.jobRepository
         .createQueryBuilder('job')
         .leftJoinAndSelect('job.employerInfo', 'employerInfo')
-         .leftJoinAndSelect('job.payments', 'payment')
+        .leftJoinAndSelect('job.payments', 'payment')
         .leftJoinAndSelect('job.packages', 'packages')
         .select([
           'job.id',
@@ -195,9 +195,9 @@ export class JobService {
           'job.submittedDate',
           'job.jobDuration',
           'job.startDate',
-           'job.endDate',
-           //'job.requiredSkills',
-           'job.status',
+          'job.endDate',
+          //'job.requiredSkills',
+          'job.status',
           'job.specialInstructions',
           'job.recruitmentFirm',
           'job.referenceCode',
@@ -216,7 +216,7 @@ export class JobService {
           'job.PSUSA_status',
           'job.resumeTo_PSUSA',
           'job.storeDate',
-         'payment',
+          'payment',
           'packages',
         ])
         .andWhere('job.status = :status', { status })
@@ -480,8 +480,47 @@ export class JobService {
       const result = await queryBuilder
         .leftJoinAndSelect('job.employerInfo', 'employerInfo')
         .leftJoinAndSelect('job.payments', 'payments')
+        .select([
+          'job.id',
+          'job.jobTitle',
+          'job.jobNumber',
+          'job.jobNumber',
+          'job.multiPosition',
+          'job.discription',
+          'job.jobType',
+          'job.startDate',
+          'job.endDate',
+          'job.educationAndExperience',
+          // 'job.specialSkills',
+          'job.travelRequirements',
+          'job.remoteJob',
+          'job.salary',
+          'job.varify',
+          'job.toApplyStatus',
+          'job.toApplyText',
+          'job.jobDuration',
+          // 'job.requiredSkills',
+          'job.status',
+          'job.submitResume',
+          'job.resumeTo_PSUSA',
+          'job.storeDate',
+          'job.submittedDate',
+          'PSUSA_status',
+          "job.remoteJob",
+          "job.resumeTo_PSUSA",
+          "job.specialInstructions",
+          "job.specialSkills",
+          "job.PSUSA_status",
+          "job.status",
+          "job.submitResume",
+          "job.toApplyStatus",
+          "job.toApplyText",
+          "job.travelRequirements",
+          "job.userId",
+          "job.varify",
+          'employerInfo', 'payments'])
         .orderBy(sortBy, sortOrder)
-        .getMany();
+        .getMany()
 
       return result;
     } catch (err) {
@@ -569,7 +608,7 @@ export class JobService {
       // Remove sensitive information before sending the response
       return responseSuccessMessage('Sorted Jobs List!', jobs, 200);
     } catch (err) {
-       console.log(err)
+      console.log(err)
       throw new HttpException(err.message, ResponseCode.BAD_REQUEST);
     }
   }
@@ -633,7 +672,7 @@ export class JobService {
           'toApplyStatus',
           'toApplyText',
           'jobDuration',
-          'requiredSkills',
+          // 'requiredSkills',
           'status',
           'submitResume',
           'resumeTo_PSUSA',
