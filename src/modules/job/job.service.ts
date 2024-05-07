@@ -172,6 +172,7 @@ export class JobService {
         .createQueryBuilder('job')
         .leftJoinAndSelect('job.employerInfo', 'employerInfo')
         .leftJoinAndSelect('job.payments', 'payment')
+        .leftJoinAndSelect('job.user', 'user')
         .leftJoinAndSelect('job.packages', 'packages')
         .select([
           'job.id',
@@ -218,6 +219,7 @@ export class JobService {
           'job.storeDate',
           'payment',
           'packages',
+          'user',
         ])
         .andWhere('job.status = :status', { status })
         .orderBy('job.submittedDate', 'DESC')
@@ -400,6 +402,8 @@ export class JobService {
           'id',
           'packagesId',
           'userId',
+          "travelRequirements",
+          // "companyNature",
           'jobTitle',
           'multiPosition',
           'discription',
@@ -408,6 +412,7 @@ export class JobService {
           'travelRequirements',
           'remoteJob',
           'varify',
+          'jobNumber',
           'jobType',
           'resumeTo_PSUSA',
           'agentData',
@@ -419,7 +424,9 @@ export class JobService {
           'salary',
           'jobDuration',
           'submitResume',
+          "salary",
           // 'requiredSkills',
+          "submitResume",
           'status',
         ],
       });
@@ -442,7 +449,6 @@ export class JobService {
       const queryBuilder = this.jobRepository
         .createQueryBuilder('job')
         .where('job.status = :status', { status: JobStatus.SUBMITTED });
-
       if (startDate) {
         queryBuilder.andWhere('job.startDate >= :startDate', {
           startDate: new Date(startDate),
@@ -462,7 +468,13 @@ export class JobService {
               .orWhere('job.jobNumber LIKE :keyword', {
                 keyword: `%${keyword}%`,
               })
-              .orWhere('job.agentData LIKE :keyword', {
+              .orWhere('employerInfo.companyName LIKE :keyword', {
+                keyword: `%${keyword}%`,
+              })
+              .orWhere('user.firstName LIKE :keyword', {
+                keyword: `%${keyword}%`,
+              })
+              .orWhere('user.lastName LIKE :keyword', {
                 keyword: `%${keyword}%`,
               })
               .orWhere('employerInfo.hiringManager LIKE :keyword', {
@@ -474,12 +486,13 @@ export class JobService {
       if (sortBy == 'hiringManager') {
         sortBy = 'employerInfo.hiringManager';
       }
-      if (sortBy == 'agent') {
-        sortBy = 'agentData.agent';
+      if (sortBy == 'companyName') {
+        sortBy = 'employerInfo.companyName';
       }
       const result = await queryBuilder
         .leftJoinAndSelect('job.employerInfo', 'employerInfo')
         .leftJoinAndSelect('job.payments', 'payments')
+        .leftJoinAndSelect('job.user', 'user')
         .select([
           'job.id',
           'job.jobTitle',
@@ -518,7 +531,9 @@ export class JobService {
           "job.travelRequirements",
           "job.userId",
           "job.varify",
-          'employerInfo', 'payments'])
+          "user",
+          'employerInfo',
+           'payments'])
         .orderBy(sortBy, sortOrder)
         .getMany()
 

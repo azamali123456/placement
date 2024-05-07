@@ -4,6 +4,8 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
   BeforeInsert,
+  ManyToOne,
+  OneToMany,
 } from 'typeorm';
 import {
   IsInt,
@@ -17,6 +19,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { userType } from 'src/constants';
+import { Job } from '../job/job.entity';
 @Entity()
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
@@ -131,6 +134,9 @@ export class User extends BaseEntity {
   @IsBoolean()
   @IsOptional()
   newsletter?: boolean;
+
+  @OneToMany(() => Job, (job) => job.user) // Define the inverse relation to Job entity
+  jobs: Job[];
 
   @BeforeInsert()
   setDefaultSubmittedDate() {

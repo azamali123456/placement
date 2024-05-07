@@ -21,6 +21,7 @@ import { EmployerInfo } from '../employer/employer.entity';
 import { Payment } from '../payment/payment.entity';
 import { Pakages } from '../pakages/pakages.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { User } from '../user/user.entity';
 @Entity()
 export class Job extends BaseEntity {
   @PrimaryGeneratedColumn()
@@ -168,6 +169,12 @@ export class Job extends BaseEntity {
 
   @OneToMany(() => Payment, (payment) => payment.job)
   payments!: Payment[];
+
+
+  @ApiProperty()
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'userId' })
+  user!: User;
 
   @ApiProperty()
   @ManyToOne(() => Pakages)
