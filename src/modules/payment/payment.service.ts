@@ -7,6 +7,7 @@ import { Payment } from './payment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JobService } from '../job/job.service';
 import { MailService } from '../mail/mail.service';
+
 @Injectable()
 export class PaymentService {
   private stripe: Stripe;
@@ -65,7 +66,9 @@ export class PaymentService {
             email: jobsMetadata[x]?.email,
           },
         };
-
+        const statusUpdated :any = await this.jobService.updateJobStatus(Number(jobsMetadata[x]?.jobId) , {
+          "status":"SUBMITTED"
+        })
         // const stripe = require('stripe')('sk_test_51NFKZLAgDjJFNJDFCKn6K3RAcVhlQ4xnm6TaKI6ddKkHdfxT3928rcB8baVoB3XCFoscIrllGpeuPjRmwWAVt6qJ00vrjPBTnF');
         // const paymentIntentId = paymentDto.data?.object?.payment_intent
         const receiptUrl = '';
@@ -140,6 +143,7 @@ export class PaymentService {
         await this.paymentRepository.save(checkOut);
       }
 
+     
       return paymentDto;
     } catch (error: any) {
       throw new HttpException(error.message, ResponseCode.BAD_REQUEST);
