@@ -185,6 +185,7 @@ export class JobService {
           'job.jobNumber',
           'job.toApplyStatus',
           'job.toApplyText',
+          'job.telecommuting',
           'job.varify',
           'job.educationAndExperience',
           'job.specialSkills',
@@ -394,7 +395,6 @@ export class JobService {
       if (where1.length === 0) {
         throw new HttpException('Invalid keyword', ResponseCode.BAD_REQUEST);
       }
-
       const result = await this.jobRepository.find({
         where: where1,
         relations: ['employerInfo'],
@@ -404,6 +404,7 @@ export class JobService {
           'userId',
           "travelRequirements",
           // "companyNature",
+          'telecommuting',
           'jobTitle',
           'multiPosition',
           'discription',
@@ -416,6 +417,7 @@ export class JobService {
           'jobType',
           'resumeTo_PSUSA',
           'agentData',
+          'specialInstructions',
           'submitResume',
           'storeDate',
           'diaplayItem',
